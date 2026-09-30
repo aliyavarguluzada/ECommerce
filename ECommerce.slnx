@@ -1,0 +1,28 @@
+<Solution>
+  <Folder Name="/Solution Items/">
+    <File Path="docker-compose.yml" />
+  </Folder>
+  <Folder Name="/src/">
+    <Project Path="ECommerce.ApiGateway/ECommerce.ApiGateway.csproj" />
+  </Folder>
+  <Folder Name="/src/Services/" />
+  <Folder Name="/src/Services/Cart/">
+    <Project Path="ECommerce.Cart.Api/ECommerce.Cart.Api.csproj" />
+  </Folder>
+  <Folder Name="/src/Services/Catalog/">
+    <Project Path="ECommerce.Catalog.Api/ECommerce.Catalog.Api.csproj" />
+  </Folder>
+  <Folder Name="/src/Services/Identity/">
+    <Project Path="ECommerce.Identity.Api/ECommerce.Identity.Api.csproj" />
+  </Folder>
+  <Folder Name="/src/Services/Inventory/">
+    <Project Path="ECommerce.Inventory.Api/ECommerce.Inventory.Api.csproj" />
+  </Folder>
+  <Folder Name="/src/Services/Orders/">
+    <Project Path="ECommerce.Order.Api/ECommerce.Order.Api.csproj" />
+  </Folder>
+  <Folder Name="/src/Services/Payment/">
+    <Project Path="ECommerce.Payment.Api/ECommerce.Payment.Api.csproj" />
+  </Folder>
+  <Folder Name="/tests/" />
+</Solution>
