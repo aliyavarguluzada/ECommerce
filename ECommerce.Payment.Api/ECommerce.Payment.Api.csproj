@@ -1,5 +1,4 @@
 <Project Sdk="Microsoft.NET.Sdk.Web">
-
   <PropertyGroup>
     <TargetFramework>net10.0</TargetFramework>
     <Nullable>enable</Nullable>
@@ -7,7 +6,6 @@
     <UserSecretsId>ffdd6f35-9439-4792-abbf-d2cbb3ebc278</UserSecretsId>
     <DockerDefaultTargetOS>Linux</DockerDefaultTargetOS>
   </PropertyGroup>
-
   <ItemGroup>
     <PackageReference Include="Microsoft.AspNetCore.OpenApi" Version="10.0.12" />
     <PackageReference Include="Microsoft.VisualStudio.Azure.Containers.Tools.Targets" Version="1.24.2-preview.1" />
@@ -16,11 +14,16 @@
     <PackageReference Include="Swashbuckle.AspNetCore.Swagger" Version="10.2.3" />
     <PackageReference Include="Swashbuckle.AspNetCore.SwaggerGen" Version="10.2.3" />
     <PackageReference Include="Swashbuckle.AspNetCore.SwaggerUI" Version="10.2.3" />
-    <PackageReference Include="Unchase.Swashbuckle.AspNetCore.Extensions" Version="2.7.2" />
   </ItemGroup>
-
   <ItemGroup>
     <Folder Include="Controllers\" />
   </ItemGroup>
-
+  <ItemGroup>
+    <ProjectReference Include="../ECommerce.Security/ECommerce.Security.csproj" />
+    <ProjectReference Include="../ECommerce.Payment.Application/ECommerce.Payment.Application.csproj" />
+    <ProjectReference Include="../ECommerce.Payment.Infrastructure/ECommerce.Payment.Infrastructure.csproj" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="10.0.12">
+      <PrivateAssets>all</PrivateAssets>
+    </PackageReference>
+  </ItemGroup>
 </Project>

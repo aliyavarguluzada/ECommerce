@@ -4,10 +4,14 @@
   </Folder>
   <Folder Name="/src/">
     <Project Path="ECommerce.ApiGateway/ECommerce.ApiGateway.csproj" />
+    <Project Path="ECommerce.Security/ECommerce.Security.csproj" />
   </Folder>
   <Folder Name="/src/Services/" />
   <Folder Name="/src/Services/Cart/">
     <Project Path="ECommerce.Cart.Api/ECommerce.Cart.Api.csproj" />
+    <Project Path="ECommerce.Cart.Domain/ECommerce.Cart.Domain.csproj" />
+    <Project Path="ECommerce.Cart.Application/ECommerce.Cart.Application.csproj" />
+    <Project Path="ECommerce.Cart.Infrastructure/ECommerce.Cart.Infrastructure.csproj" />
   </Folder>
   <Folder Name="/src/Services/Catalog/">
     <Project Path="ECommerce.Catalog.Api/ECommerce.Catalog.Api.csproj" />
@@ -17,17 +21,31 @@
   </Folder>
   <Folder Name="/src/Services/Identity/">
     <Project Path="ECommerce.Identity.Api/ECommerce.Identity.Api.csproj" />
+    <Project Path="ECommerce.Identity.Domain/ECommerce.Identity.Domain.csproj" />
+    <Project Path="ECommerce.Identity.Application/ECommerce.Identity.Application.csproj" />
+    <Project Path="ECommerce.Identity.Infrastructure/ECommerce.Identity.Infrastructure.csproj" />
   </Folder>
   <Folder Name="/src/Services/Inventory/">
     <Project Path="ECommerce.Inventory.Api/ECommerce.Inventory.Api.csproj" />
+    <Project Path="ECommerce.Inventory.Domain/ECommerce.Inventory.Domain.csproj" />
+    <Project Path="ECommerce.Inventory.Application/ECommerce.Inventory.Application.csproj" />
+    <Project Path="ECommerce.Inventory.Infrastructure/ECommerce.Inventory.Infrastructure.csproj" />
   </Folder>
   <Folder Name="/src/Services/Orders/">
     <Project Path="ECommerce.Order.Api/ECommerce.Order.Api.csproj" />
+    <Project Path="ECommerce.Order.Domain/ECommerce.Order.Domain.csproj" />
+    <Project Path="ECommerce.Order.Application/ECommerce.Order.Application.csproj" />
+    <Project Path="ECommerce.Order.Infrastructure/ECommerce.Order.Infrastructure.csproj" />
   </Folder>
   <Folder Name="/src/Services/Payment/">
     <Project Path="ECommerce.Payment.Api/ECommerce.Payment.Api.csproj" />
+    <Project Path="ECommerce.Payment.Domain/ECommerce.Payment.Domain.csproj" />
+    <Project Path="ECommerce.Payment.Application/ECommerce.Payment.Application.csproj" />
+    <Project Path="ECommerce.Payment.Infrastructure/ECommerce.Payment.Infrastructure.csproj" />
   </Folder>
   <Folder Name="/tests/">
+    <Project Path="tests/ECommerce.Tests/ECommerce.Tests.csproj" />
+    <Project Path="tests/ECommerce.Testing/ECommerce.Testing.csproj" />
     <Project Path="tests/ECommerce.Catalog.Checks/ECommerce.Catalog.Checks.csproj" />
   </Folder>
 </Solution>

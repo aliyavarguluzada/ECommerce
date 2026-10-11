@@ -20,6 +20,9 @@
 **/npm-debug.log
 **/obj
 .tools
+security.local.json
+identity.private.json
+.env
 **/secrets.dev.yaml
 **/values.dev.yaml
 LICENSE

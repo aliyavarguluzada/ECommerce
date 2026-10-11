@@ -2,6 +2,7 @@ using ECommerce.Catalog.Application.Categories;
 using ECommerce.Catalog.Application.Categories.Commands.CreateCategory;
 using ECommerce.Catalog.Application.Categories.Queries.GetCategoryById;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Authorization;
 using ECommerce.Catalog.Application.Categories.Commands.UpdateCategory;
 using ECommerce.Catalog.Application.Categories.Commands.DeleteCategory;
 using ECommerce.Catalog.Application.Categories.Queries.GetCategories;
@@ -20,6 +21,7 @@ public sealed class CategoryController(
         Ok(await listHandler.HandleAsync(cancellationToken));
 
     [HttpPut("{id:guid}")]
+    [Authorize(Policy = "Admin")]
     [ProducesResponseType(StatusCodes.Status204NoContent)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     [ProducesResponseType<ProblemDetails>(StatusCodes.Status400BadRequest)]
@@ -28,6 +30,7 @@ public sealed class CategoryController(
         await updateHandler.HandleAsync(id, command, cancellationToken) ? NoContent() : NotFound();
 
     [HttpDelete("{id:guid}")]
+    [Authorize(Policy = "Admin")]
     [ProducesResponseType(StatusCodes.Status204NoContent)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     [ProducesResponseType<ProblemDetails>(StatusCodes.Status409Conflict)]
@@ -35,6 +38,7 @@ public sealed class CategoryController(
         await deleteHandler.HandleAsync(id, cancellationToken) ? NoContent() : NotFound();
 
     [HttpPost]
+    [Authorize(Policy = "Admin")]
     [ProducesResponseType<CategoryResponse>(StatusCodes.Status201Created)]
     [ProducesResponseType<ProblemDetails>(StatusCodes.Status400BadRequest)]
     [ProducesResponseType<ProblemDetails>(StatusCodes.Status409Conflict)]

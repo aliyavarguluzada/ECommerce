@@ -363,3 +363,6 @@ MigrationBackup/
 FodyWeavers.xsd
 # Project-local EF CLI binaries
 .tools/
+security.local.json
+identity.private.json
+.env

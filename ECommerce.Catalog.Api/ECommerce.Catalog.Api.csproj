@@ -1,5 +1,4 @@
 <Project Sdk="Microsoft.NET.Sdk.Web">
-
   <PropertyGroup>
     <TargetFramework>net10.0</TargetFramework>
     <Nullable>enable</Nullable>
@@ -7,7 +6,6 @@
     <UserSecretsId>7be7f595-1128-4dec-b648-48531e19e7ad</UserSecretsId>
     <DockerDefaultTargetOS>Linux</DockerDefaultTargetOS>
   </PropertyGroup>
-
   <ItemGroup>
     <PackageReference Include="FluentValidation.DependencyInjectionExtensions" Version="12.2.0" />
     <PackageReference Include="Microsoft.AspNetCore.OpenApi" Version="10.0.12" />
@@ -23,16 +21,16 @@
     <PackageReference Include="Swashbuckle.AspNetCore.SwaggerGen" Version="10.2.3" />
     <PackageReference Include="Swashbuckle.AspNetCore.SwaggerUI" Version="10.2.3" />
   </ItemGroup>
-
   <ItemGroup>
     <Folder Include="Dtos\Categories\" />
     <Folder Include="Dtos\Products\" />
     <Folder Include="Validators\" />
   </ItemGroup>
-
   <ItemGroup>
     <ProjectReference Include="..\ECommerce.Catalog.Application\ECommerce.Catalog.Application.csproj" />
     <ProjectReference Include="..\ECommerce.Catalog.Infrastructure\ECommerce.Catalog.Infrastructure.csproj" />
   </ItemGroup>
-
+  <ItemGroup>
+    <ProjectReference Include="../ECommerce.Security/ECommerce.Security.csproj" />
+  </ItemGroup>
 </Project>

@@ -4,6 +4,7 @@ using ECommerce.Catalog.Infrastructure;
 using Microsoft.AspNetCore.Diagnostics.HealthChecks;
 using ECommerce.Catalog.Infrastructure.Persistence;
 using Microsoft.EntityFrameworkCore;
+using ECommerce.Security;
 namespace ECommerce.Catalog.Api;
 
 public class Program
@@ -12,6 +13,8 @@ public class Program
     {
         var migrate = args.Contains("--migrate");
         var builder = WebApplication.CreateBuilder(args.Where(x => x != "--migrate").ToArray());
+        builder.AddLocalSecurityConfiguration();
+        builder.Services.AddCommerceSecurity(builder.Configuration, migrate);
         builder.Services.AddControllers();
         builder.Services.AddOpenApi();
         builder.Services.AddProblemDetails();
@@ -36,7 +39,7 @@ public class Program
             app.UseSwaggerUI(options => options.SwaggerEndpoint("/openapi/v1.json", "Catalog API"));
         }
         app.UseHttpsRedirection();
-        app.UseAuthorization();
+        app.UseAuthentication(); app.UseAuthorization();
         app.MapControllers();
         app.MapHealthChecks("/health/live", new HealthCheckOptions { Predicate = _ => false });
         app.MapHealthChecks("/health/ready", new HealthCheckOptions { Predicate = check => check.Tags.Contains("ready") });

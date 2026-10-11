@@ -1,6 +1,58 @@
-@ECommerce.Inventory.Api_HostAddress = http://localhost:5252
+@adminToken = REPLACE_ADMIN_ACCESS_TOKEN
+@host = http://localhost:5172
+@productId = 00000000-0000-0000-0000-000000000000
+@orderId = 11111111-1111-1111-1111-111111111111
+@adjustmentId = 22222222-2222-2222-2222-222222222222
 
-GET {{ECommerce.Inventory.Api_HostAddress}}/weatherforecast/
-Accept: application/json
+### Initialize stock for an active Catalog product.
+POST {{host}}/api/inventory/stock
+Authorization: Bearer {{adminToken}}
+Content-Type: application/json
 
-###
+{ "productId": "{{productId}}", "quantity": 100 }
+
+### Stock balance.
+GET {{host}}/api/inventory/stock/{{productId}}
+Authorization: Bearer {{adminToken}}
+
+### Paginated low stock.
+GET {{host}}/api/inventory/stock?pageNumber=1&pageSize=20&maxAvailable=10
+Authorization: Bearer {{adminToken}}
+
+### Restock; reuse adjustmentId only when retrying this exact adjustment.
+POST {{host}}/api/inventory/stock/{{productId}}/adjustments
+Authorization: Bearer {{adminToken}}
+Content-Type: application/json
+
+{ "requestId": "{{adjustmentId}}", "delta": 25, "reason": "Supplier delivery" }
+
+### Adjustment history.
+GET {{host}}/api/inventory/stock/{{productId}}/adjustments
+Authorization: Bearer {{adminToken}}
+
+### Reserve stock for an order (normally called by Order).
+POST {{host}}/api/inventory/reservations
+Authorization: Bearer {{adminToken}}
+Content-Type: application/json
+
+{ "orderId": "{{orderId}}", "items": [{ "productId": "{{productId}}", "quantity": 2 }] }
+
+### Reservation details.
+GET {{host}}/api/inventory/reservations/{{orderId}}
+Authorization: Bearer {{adminToken}}
+
+### Reservation list.
+GET {{host}}/api/inventory/reservations?status=Reserved
+Authorization: Bearer {{adminToken}}
+
+### Commit reserved units (normally called by Order).
+POST {{host}}/api/inventory/reservations/{{orderId}}/commit
+Authorization: Bearer {{adminToken}}
+
+### Release reserved units or restore committed units (normally called by Order).
+POST {{host}}/api/inventory/reservations/{{orderId}}/release
+Authorization: Bearer {{adminToken}}
+
+### Readiness.
+GET {{host}}/health/ready
+Authorization: Bearer {{adminToken}}

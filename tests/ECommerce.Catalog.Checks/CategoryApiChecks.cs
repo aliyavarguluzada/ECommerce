@@ -129,6 +129,12 @@ internal static class CategoryApiChecks
 
 internal sealed class CategoryApiFactory : WebApplicationFactory<ECommerce.Catalog.Api.Program>
 {
+    public CategoryApiFactory() => ECommerce.Testing.TestCredentials.Initialize();
+    protected override void ConfigureClient(HttpClient client)
+    {
+        base.ConfigureClient(client);
+        ECommerce.Testing.TestCredentials.Authenticate(client, admin: true);
+    }
     public FakeCategoryDatabase Database { get; } = new();
 
     protected override void ConfigureWebHost(IWebHostBuilder builder)

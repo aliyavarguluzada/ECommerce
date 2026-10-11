@@ -1,6 +1,32 @@
-@ECommerce.Identity.Api_HostAddress = http://localhost:5022
+@host = http://localhost:5174
+@token = REPLACE_ACCESS_TOKEN
+@refreshToken = REPLACE_REFRESH_TOKEN
 
-GET {{ECommerce.Identity.Api_HostAddress}}/weatherforecast/
-Accept: application/json
+### Register; choose your own strong password.
+POST {{host}}/api/identity/register
+Content-Type: application/json
 
-###
+{ "email": "customer@example.com", "password": "ReplaceWithYourOwn-123!", "displayName": "Example Customer" }
+
+### Login.
+POST {{host}}/api/identity/login
+Content-Type: application/json
+
+{ "email": "customer@example.com", "password": "ReplaceWithYourOwn-123!" }
+
+### Refresh; replace both stored tokens with the returned values.
+POST {{host}}/api/identity/refresh
+Content-Type: application/json
+
+{ "refreshToken": "{{refreshToken}}" }
+
+### Profile.
+GET {{host}}/api/identity/me
+Authorization: Bearer {{token}}
+
+### Logout.
+POST {{host}}/api/identity/logout
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{ "refreshToken": "{{refreshToken}}" }

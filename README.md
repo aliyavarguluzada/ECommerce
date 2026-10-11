@@ -1,5 +1,30 @@
 # ECommerce
 
+## Identity, Cart, Payment, and Gateway
+
+Identity implements registration/login, RSA access tokens, rotated refresh sessions,
+logout, password/profile updates, and administrator roles. Cart stores customer-owned
+items and idempotent checkout snapshots. Payment persists simulated development
+charges/refunds and coordinates paid order confirmation. YARP routes public APIs
+through localhost:5100, with backend ownership/admin checks and service authentication.
+
+See [Identity, Cart, Payment, and Gateway](docs/identity-cart-payment-gateway.md) for
+setup, security configuration, migrations, authorization, and checkout behavior.
+The gateway .http file contains authenticated examples. Payment does not charge real
+money. Automated tests now cover all services; message queues are not implemented.
+
+## Inventory and Order
+
+Inventory and Order now have Domain, Application, Infrastructure, and API layers.
+Inventory implements stock balances, idempotent adjustments, and atomic reservations.
+Order implements Catalog price snapshots, Inventory coordination, confirmation,
+cancellation, shipping, delivery, and a durable HTTP recovery worker. Each service
+owns its database; no message broker is required.
+
+See [Inventory and Order documentation](docs/inventory-and-order.md) for endpoints,
+recovery behavior, configuration, migration commands, and Docker setup. Test runs
+for these services are deferred; compilation and migration generation were completed.
+
 ## Catalog service
 
 Catalog now implements category CRUD and product creation, retrieval, updating,
@@ -45,8 +70,8 @@ ETag/If-Match checks for edits submitted from an older client view are not imple
 Domain events stay within the aggregate in memory. No broker, RabbitMQ, event
 publisher, transactional outbox, or worker is required for the current standalone
 Catalog workflows. Integration events can be added when Inventory or Order need them.
-Authentication and administrator permissions will need integration with Identity
-before exposing write endpoints beyond the local development environment.
+Catalog writes now require an Identity token with the Admin role. Reads remain
+anonymous. See the Identity integration documentation for account setup.
 
 ## Endpoints
 
@@ -111,7 +136,8 @@ has no database DDL because the existing UpdatedAt columns are reused.
 
 ## Docker development
 
-The root Compose file starts PostgreSQL and Catalog, without a message broker.
+The root Compose file includes PostgreSQL, all six service APIs, and the gateway,
+without a message broker. See the Identity integration setup before starting Compose.
 The Catalog Dockerfile restores all four projects. Local ports are bound to loopback.
 
 ```powershell
@@ -127,26 +153,15 @@ and credentials; Compose initialization settings apply only to a new volume.
 
 ## Verification
 
-```powershell
-dotnet build ECommerce.slnx '-p:Platform=Any CPU'
-dotnet run --project tests/ECommerce.Catalog.Checks --no-build --no-restore '-p:Platform=AnyCPU'
-```
-
-Checks cover domain invariants, event behavior, lifecycle changes, atomic domain
-updates, PostgreSQL schema/query generation, migration consistency, provider-error
-translation, and the real HTTP pipeline using repository test doubles. The HTTP
-checks cover both aggregates, paging/filtering, validation, missing IDs, conflicts,
-price changes, discontinuation, OpenAPI, Swagger UI, and liveness.
-
-Optional live PostgreSQL checks use CATALOG_TEST_CONNECTION_STRING. Point it at a
-development/test database whose user can create schemas. The checks create a
-uniquely named schema and apply migrations. They verify category CRUD (including
-duplicate renames, UTC timestamps, description clearing, and concurrent updates),
-product workflows, and product concurrency, then remove only that schema afterward.
-Without this variable, live
-checks explicitly report that they were skipped.
+The standard xUnit suite covers all six backend services and the API gateway,
+including authentication, ownership, checkout HTTP integration, recovery, and
+PostgreSQL migration consistency. See [Automated tests](docs/testing.md) for the
+coverage matrix and instructions for optional live PostgreSQL tests.
 
 ```powershell
-$env:CATALOG_TEST_CONNECTION_STRING = 'Host=localhost;Port=5432;Database=catalog_db;Username=ecommerce;Password=ecommerce'
-dotnet run --project tests/ECommerce.Catalog.Checks --no-build --no-restore '-p:Platform=AnyCPU'
+dotnet test tests/ECommerce.Tests/ECommerce.Tests.csproj '-p:Platform=AnyCPU'
 ```
+
+Current local result: **146 passed, 6 skipped, 0 failed**. The skipped tests require
+`ECOMMERCE_TEST_POSTGRES_CONNECTION`; no PostgreSQL server was available locally.
+Tests use temporary signing keys and service credentials. No real payments occur.

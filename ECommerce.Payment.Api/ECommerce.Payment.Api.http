@@ -1,6 +1,19 @@
-@ECommerce.Payment.Api_HostAddress = http://localhost:5109
+@host = http://localhost:5176
+@token = REPLACE_CUSTOMER_ACCESS_TOKEN
+@orderId = 33333333-3333-3333-3333-333333333333
+@paymentId = 55555555-5555-5555-5555-555555555555
 
-GET {{ECommerce.Payment.Api_HostAddress}}/weatherforecast/
-Accept: application/json
+### Development payment: does not charge real money.
+POST {{host}}/api/payments
+Authorization: Bearer {{token}}
+Content-Type: application/json
 
-###
+{ "requestId": "{{paymentId}}", "orderId": "{{orderId}}", "methodToken": "dev-approved" }
+
+### Owned receipt.
+GET {{host}}/api/payments/{{paymentId}}
+Authorization: Bearer {{token}}
+
+### Own payment history.
+GET {{host}}/api/payments?pageNumber=1&pageSize=20
+Authorization: Bearer {{token}}

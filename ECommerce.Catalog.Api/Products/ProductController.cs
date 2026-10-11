@@ -7,6 +7,7 @@ using ECommerce.Catalog.Application.Products.Commands.DiscontinueProduct;
 using ECommerce.Catalog.Application.Products.Queries.GetProductById;
 using ECommerce.Catalog.Application.Products.Queries.GetProducts;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Authorization;
 
 namespace ECommerce.Catalog.Api.Products;
 
@@ -34,6 +35,7 @@ public sealed class ProductController(
     }
 
     [HttpPost]
+    [Authorize(Policy = "Admin")]
     [ProducesResponseType<ProductResponse>(StatusCodes.Status201Created)]
     [ProducesResponseType<ProblemDetails>(StatusCodes.Status400BadRequest)]
     public async Task<ActionResult<ProductResponse>> Create(CreateProductCommand command, CancellationToken cancellationToken)
@@ -43,6 +45,7 @@ public sealed class ProductController(
     }
 
     [HttpPut("{id:guid}")]
+    [Authorize(Policy = "Admin")]
     [ProducesResponseType(StatusCodes.Status204NoContent)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     [ProducesResponseType<ProblemDetails>(StatusCodes.Status400BadRequest)]
@@ -51,6 +54,7 @@ public sealed class ProductController(
         await updateHandler.HandleAsync(id, command, cancellationToken) ? NoContent() : NotFound();
 
     [HttpPatch("{id:guid}/price")]
+    [Authorize(Policy = "Admin")]
     [ProducesResponseType(StatusCodes.Status204NoContent)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     [ProducesResponseType<ProblemDetails>(StatusCodes.Status400BadRequest)]
@@ -60,6 +64,7 @@ public sealed class ProductController(
 
     // Retain the product for historical orders and inventory references.
     [HttpDelete("{id:guid}")]
+    [Authorize(Policy = "Admin")]
     [ProducesResponseType(StatusCodes.Status204NoContent)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     [ProducesResponseType<ProblemDetails>(StatusCodes.Status409Conflict)]

@@ -1,6 +1,122 @@
-@ECommerce.ApiGateway_HostAddress = http://localhost:5198
+@host = http://localhost:5100
+@customerToken = REPLACE_CUSTOMER_ACCESS_TOKEN
+@adminToken = REPLACE_ADMIN_ACCESS_TOKEN
+@refreshToken = REPLACE_REFRESH_TOKEN
+@categoryId = 00000000-0000-0000-0000-000000000000
+@productId = 00000000-0000-0000-0000-000000000000
+@orderId = 33333333-3333-3333-3333-333333333333
+@paymentId = 55555555-5555-5555-5555-555555555555
 
-GET {{ECommerce.ApiGateway_HostAddress}}/weatherforecast/
-Accept: application/json
+### Register a customer; choose your own password.
+POST {{host}}/api/identity/register
+Content-Type: application/json
 
-###
+{ "email": "customer@example.com", "password": "ReplaceWithYourOwn-123!", "displayName": "Example Customer" }
+
+### Login; copy returned accessToken/refreshToken into the variables.
+POST {{host}}/api/identity/login
+Content-Type: application/json
+
+{ "email": "customer@example.com", "password": "ReplaceWithYourOwn-123!" }
+
+### Rotate refresh token; replace both stored tokens from this response.
+POST {{host}}/api/identity/refresh
+Content-Type: application/json
+
+{ "refreshToken": "{{refreshToken}}" }
+
+### Current profile.
+GET {{host}}/api/identity/me
+Authorization: Bearer {{customerToken}}
+
+### Admin: create a category; copy its ID into categoryId.
+POST {{host}}/api/categories
+Authorization: Bearer {{adminToken}}
+Content-Type: application/json
+
+{ "name": "Electronics" }
+
+### Admin: create a product; copy its ID into productId.
+POST {{host}}/api/products
+Authorization: Bearer {{adminToken}}
+Content-Type: application/json
+
+{ "name": "Wireless mouse", "price": 99.99, "currency": "USD", "categoryId": "{{categoryId}}" }
+
+### Admin: initialize inventory.
+POST {{host}}/api/inventory/stock
+Authorization: Bearer {{adminToken}}
+Content-Type: application/json
+
+{ "productId": "{{productId}}", "quantity": 100 }
+
+### Customer: set cart quantity.
+PUT {{host}}/api/cart/items/{{productId}}
+Authorization: Bearer {{customerToken}}
+Content-Type: application/json
+
+{ "quantity": 2 }
+
+### Customer: current cart and refreshed prices.
+GET {{host}}/api/cart
+Authorization: Bearer {{customerToken}}
+
+### Checkout; reuse orderId only for retries of this checkout.
+POST {{host}}/api/cart/checkout
+Authorization: Bearer {{customerToken}}
+Content-Type: application/json
+
+{
+  "requestId": "{{orderId}}",
+  "shippingAddress": {
+    "recipient": "Example Customer", "line1": "1 Example Street", "line2": null,
+    "city": "Baku", "region": null, "postalCode": "AZ1000", "countryCode": "AZ"
+  }
+}
+
+### Resume a pending checkout using its stored snapshot.
+POST {{host}}/api/cart/checkout/retry
+Authorization: Bearer {{customerToken}}
+
+### Customer-owned order.
+GET {{host}}/api/orders/{{orderId}}
+Authorization: Bearer {{customerToken}}
+
+### Development payment only: no real charge. Reuse paymentId to retry this payment.
+POST {{host}}/api/payments
+Authorization: Bearer {{customerToken}}
+Content-Type: application/json
+
+{ "requestId": "{{paymentId}}", "orderId": "{{orderId}}", "methodToken": "dev-approved" }
+
+### Payment receipt; 202 means background recovery is still pending.
+GET {{host}}/api/payments/{{paymentId}}
+Authorization: Bearer {{customerToken}}
+
+### Admin: ship after successful payment and inventory confirmation.
+POST {{host}}/api/orders/{{orderId}}/ship
+Authorization: Bearer {{adminToken}}
+Content-Type: application/json
+
+{ "carrier": "Example carrier", "trackingNumber": "TRACK-001" }
+
+### Admin: record delivery.
+POST {{host}}/api/orders/{{orderId}}/deliver
+Authorization: Bearer {{adminToken}}
+
+### Customer: cancel before shipping; stock release and development refund are coordinated.
+POST {{host}}/api/orders/{{orderId}}/cancel
+Authorization: Bearer {{customerToken}}
+Content-Type: application/json
+
+{ "reason": "Customer requested cancellation" }
+
+### Revoke refresh-session family.
+POST {{host}}/api/identity/logout
+Authorization: Bearer {{customerToken}}
+Content-Type: application/json
+
+{ "refreshToken": "{{refreshToken}}" }
+
+### Gateway liveness.
+GET {{host}}/health/live

@@ -1,6 +1,36 @@
-@ECommerce.Cart.Api_HostAddress = http://localhost:5294
+@host = http://localhost:5175
+@token = REPLACE_CUSTOMER_ACCESS_TOKEN
+@productId = 00000000-0000-0000-0000-000000000000
+@checkoutId = 33333333-3333-3333-3333-333333333333
 
-GET {{ECommerce.Cart.Api_HostAddress}}/weatherforecast/
-Accept: application/json
+### Own cart.
+GET {{host}}/api/cart
+Authorization: Bearer {{token}}
 
-###
+### Set quantity.
+PUT {{host}}/api/cart/items/{{productId}}
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{ "quantity": 2 }
+
+### Checkout.
+POST {{host}}/api/cart/checkout
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+  "requestId": "{{checkoutId}}",
+  "shippingAddress": {
+    "recipient": "Example Customer", "line1": "1 Example Street", "line2": null,
+    "city": "Baku", "region": null, "postalCode": "AZ1000", "countryCode": "AZ"
+  }
+}
+
+### Resume a pending checkout.
+POST {{host}}/api/cart/checkout/retry
+Authorization: Bearer {{token}}
+
+### Clear editable cart.
+DELETE {{host}}/api/cart
+Authorization: Bearer {{token}}
