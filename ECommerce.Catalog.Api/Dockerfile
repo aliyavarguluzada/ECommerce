@@ -13,6 +13,9 @@ FROM mcr.microsoft.com/dotnet/sdk:10.0 AS build
 ARG BUILD_CONFIGURATION=Release
 WORKDIR /src
 COPY ["ECommerce.Catalog.Api/ECommerce.Catalog.Api.csproj", "ECommerce.Catalog.Api/"]
+COPY ["ECommerce.Catalog.Application/ECommerce.Catalog.Application.csproj", "ECommerce.Catalog.Application/"]
+COPY ["ECommerce.Catalog.Domain/ECommerce.Catalog.Domain.csproj", "ECommerce.Catalog.Domain/"]
+COPY ["ECommerce.Catalog.Infrastructure/ECommerce.Catalog.Infrastructure.csproj", "ECommerce.Catalog.Infrastructure/"]
 RUN dotnet restore "./ECommerce.Catalog.Api/ECommerce.Catalog.Api.csproj"
 COPY . .
 WORKDIR "/src/ECommerce.Catalog.Api"

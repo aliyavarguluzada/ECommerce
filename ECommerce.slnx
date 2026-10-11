@@ -11,6 +11,9 @@
   </Folder>
   <Folder Name="/src/Services/Catalog/">
     <Project Path="ECommerce.Catalog.Api/ECommerce.Catalog.Api.csproj" />
+    <Project Path="ECommerce.Catalog.Application/ECommerce.Catalog.Application.csproj" Id="55d06119-07ab-4e33-9232-eaf8de9c3d26" />
+    <Project Path="ECommerce.Catalog.Domain/ECommerce.Catalog.Domain.csproj" Id="198220ba-ec99-4585-8188-316c7b08e164" />
+    <Project Path="ECommerce.Catalog.Infrastructure/ECommerce.Catalog.Infrastructure.csproj" Id="68555738-b78e-4e50-9c39-8cff28b61f0a" />
   </Folder>
   <Folder Name="/src/Services/Identity/">
     <Project Path="ECommerce.Identity.Api/ECommerce.Identity.Api.csproj" />
@@ -24,5 +27,7 @@
   <Folder Name="/src/Services/Payment/">
     <Project Path="ECommerce.Payment.Api/ECommerce.Payment.Api.csproj" />
   </Folder>
-  <Folder Name="/tests/" />
+  <Folder Name="/tests/">
+    <Project Path="tests/ECommerce.Catalog.Checks/ECommerce.Catalog.Checks.csproj" />
+  </Folder>
 </Solution>
