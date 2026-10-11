@@ -141,8 +141,6 @@ class node_catalog_api,node_category_api,node_catalog_handlers,node_catalog_doma
 class node_cart_api,node_cart_service,node_cart_db,node_order_api,node_order_service,node_order_db,node_order_recovery toneMint
 class node_inventory_api,node_inventory_service,node_inventory_db toneRose
 class node_payment_api,node_payment_service,node_payment_db,node_payment_provider,node_customer,node_admin toneIndigo
-classDef whiteBox fill:#ffffff
-class node_gateway,node_identity_api,node_identity_service,node_security,node_catalog_api,node_category_api,node_catalog_handlers,node_catalog_domain,node_cart_api,node_cart_service,node_order_api,node_order_service,node_order_recovery,node_inventory_api,node_inventory_service,node_payment_api,node_payment_service,node_payment_provider whiteBox
 ```
 
 ## Identity, Cart, Payment, and Gateway
