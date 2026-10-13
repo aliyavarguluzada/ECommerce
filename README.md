@@ -104,30 +104,30 @@ node_payment_service -.->|"confirms payment"| node_order_api
 end
 style architecture_canvas fill:#F2E6FF,stroke:#c4b5fd,stroke-width:1px,color:#0f172a
 
-click node_gateway "https://github.com/aliyavarguluzada/ecommerce/blob/master/ECommerce.ApiGateway/Program.cs"
-click node_identity_api "https://github.com/aliyavarguluzada/ecommerce/blob/master/ECommerce.Identity.Api/Controllers/IdentityController.cs"
-click node_identity_service "https://github.com/aliyavarguluzada/ecommerce/blob/master/ECommerce.Identity.Infrastructure/IdentityService.cs"
-click node_identity_db "https://github.com/aliyavarguluzada/ecommerce/blob/master/ECommerce.Identity.Infrastructure/IdentityDbContext.cs"
-click node_security "https://github.com/aliyavarguluzada/ecommerce/blob/master/ECommerce.Security/SecurityExtensions.cs"
-click node_catalog_api "https://github.com/aliyavarguluzada/ecommerce/blob/master/ECommerce.Catalog.Api/Products/ProductController.cs"
-click node_category_api "https://github.com/aliyavarguluzada/ecommerce/blob/master/ECommerce.Catalog.Api/Categories/CategoryController.cs"
-click node_catalog_handlers "https://github.com/aliyavarguluzada/ecommerce/tree/master/ECommerce.Catalog.Application"
-click node_catalog_domain "https://github.com/aliyavarguluzada/ecommerce/blob/master/ECommerce.Catalog.Domain/Aggregates/Products/Product.cs"
-click node_catalog_store "https://github.com/aliyavarguluzada/ecommerce/blob/master/ECommerce.Catalog.Infrastructure/Persistence/CatalogDbContext.cs"
-click node_cart_api "https://github.com/aliyavarguluzada/ecommerce/blob/master/ECommerce.Cart.Api/Controllers/CartController.cs"
-click node_cart_service "https://github.com/aliyavarguluzada/ecommerce/blob/master/ECommerce.Cart.Application/CartService.cs"
-click node_cart_db "https://github.com/aliyavarguluzada/ecommerce/blob/master/ECommerce.Cart.Infrastructure/CartDbContext.cs"
-click node_order_api "https://github.com/aliyavarguluzada/ecommerce/blob/master/ECommerce.Order.Api/Controllers/OrdersController.cs"
-click node_order_service "https://github.com/aliyavarguluzada/ecommerce/blob/master/ECommerce.Order.Application/OrderService.cs"
-click node_order_db "https://github.com/aliyavarguluzada/ecommerce/blob/master/ECommerce.Order.Infrastructure/OrderDbContext.cs"
-click node_order_recovery "https://github.com/aliyavarguluzada/ecommerce/blob/master/ECommerce.Order.Api/Common/OrderRecoveryWorker.cs"
-click node_inventory_api "https://github.com/aliyavarguluzada/ecommerce/blob/master/ECommerce.Inventory.Api/Controllers/ReservationsController.cs"
-click node_inventory_service "https://github.com/aliyavarguluzada/ecommerce/blob/master/ECommerce.Inventory.Application/InventoryService.cs"
-click node_inventory_db "https://github.com/aliyavarguluzada/ecommerce/blob/master/ECommerce.Inventory.Infrastructure/InventoryDbContext.cs"
-click node_payment_api "https://github.com/aliyavarguluzada/ecommerce/blob/master/ECommerce.Payment.Api/Controllers/PaymentsController.cs"
-click node_payment_service "https://github.com/aliyavarguluzada/ecommerce/blob/master/ECommerce.Payment.Application/PaymentService.cs"
-click node_payment_db "https://github.com/aliyavarguluzada/ecommerce/blob/master/ECommerce.Payment.Infrastructure/PaymentDbContext.cs"
-click node_payment_provider "https://github.com/aliyavarguluzada/ecommerce/blob/master/ECommerce.Payment.Infrastructure/DevelopmentPaymentProvider.cs"
+click node_gateway "https://github.com/aliyavarguluzada/ecommerce/blob/master/src/ECommerce.ApiGateway/Program.cs"
+click node_identity_api "https://github.com/aliyavarguluzada/ecommerce/blob/master/src/ECommerce.Identity.Api/Controllers/IdentityController.cs"
+click node_identity_service "https://github.com/aliyavarguluzada/ecommerce/blob/master/src/ECommerce.Identity.Infrastructure/IdentityService.cs"
+click node_identity_db "https://github.com/aliyavarguluzada/ecommerce/blob/master/src/ECommerce.Identity.Infrastructure/IdentityDbContext.cs"
+click node_security "https://github.com/aliyavarguluzada/ecommerce/blob/master/src/ECommerce.Security/SecurityExtensions.cs"
+click node_catalog_api "https://github.com/aliyavarguluzada/ecommerce/blob/master/src/ECommerce.Catalog.Api/Products/ProductController.cs"
+click node_category_api "https://github.com/aliyavarguluzada/ecommerce/blob/master/src/ECommerce.Catalog.Api/Categories/CategoryController.cs"
+click node_catalog_handlers "https://github.com/aliyavarguluzada/ecommerce/tree/master/src/ECommerce.Catalog.Application"
+click node_catalog_domain "https://github.com/aliyavarguluzada/ecommerce/blob/master/src/ECommerce.Catalog.Domain/Aggregates/Products/Product.cs"
+click node_catalog_store "https://github.com/aliyavarguluzada/ecommerce/blob/master/src/ECommerce.Catalog.Infrastructure/Persistence/CatalogDbContext.cs"
+click node_cart_api "https://github.com/aliyavarguluzada/ecommerce/blob/master/src/ECommerce.Cart.Api/Controllers/CartController.cs"
+click node_cart_service "https://github.com/aliyavarguluzada/ecommerce/blob/master/src/ECommerce.Cart.Application/CartService.cs"
+click node_cart_db "https://github.com/aliyavarguluzada/ecommerce/blob/master/src/ECommerce.Cart.Infrastructure/CartDbContext.cs"
+click node_order_api "https://github.com/aliyavarguluzada/ecommerce/blob/master/src/ECommerce.Order.Api/Controllers/OrdersController.cs"
+click node_order_service "https://github.com/aliyavarguluzada/ecommerce/blob/master/src/ECommerce.Order.Application/OrderService.cs"
+click node_order_db "https://github.com/aliyavarguluzada/ecommerce/blob/master/src/ECommerce.Order.Infrastructure/OrderDbContext.cs"
+click node_order_recovery "https://github.com/aliyavarguluzada/ecommerce/blob/master/src/ECommerce.Order.Api/Common/OrderRecoveryWorker.cs"
+click node_inventory_api "https://github.com/aliyavarguluzada/ecommerce/blob/master/src/ECommerce.Inventory.Api/Controllers/ReservationsController.cs"
+click node_inventory_service "https://github.com/aliyavarguluzada/ecommerce/blob/master/src/ECommerce.Inventory.Application/InventoryService.cs"
+click node_inventory_db "https://github.com/aliyavarguluzada/ecommerce/blob/master/src/ECommerce.Inventory.Infrastructure/InventoryDbContext.cs"
+click node_payment_api "https://github.com/aliyavarguluzada/ecommerce/blob/master/src/ECommerce.Payment.Api/Controllers/PaymentsController.cs"
+click node_payment_service "https://github.com/aliyavarguluzada/ecommerce/blob/master/src/ECommerce.Payment.Application/PaymentService.cs"
+click node_payment_db "https://github.com/aliyavarguluzada/ecommerce/blob/master/src/ECommerce.Payment.Infrastructure/PaymentDbContext.cs"
+click node_payment_provider "https://github.com/aliyavarguluzada/ecommerce/blob/master/src/ECommerce.Payment.Infrastructure/DevelopmentPaymentProvider.cs"
 
 classDef toneNeutral fill:#f8fafc,stroke:#334155,stroke-width:1.5px,color:#0f172a
 classDef toneBlue fill:#dbeafe,stroke:#2563eb,stroke-width:1.5px,color:#172554
@@ -245,7 +245,7 @@ Product list query parameters:
 Invalid input or a missing product category returns 400 ProblemDetails. Duplicate
 category names, category deletion with products, and concurrent saves return 409
 ProblemDetails. Missing mutation targets return 404. Request examples are in
-ECommerce.Catalog.Api/ECommerce.Catalog.Api.http.
+src/ECommerce.Catalog.Api/ECommerce.Catalog.Api.http.
 
 ## Run locally
 
@@ -257,8 +257,8 @@ From the solution root:
 
 ```powershell
 dotnet build ECommerce.slnx '-p:Platform=Any CPU'
-dotnet run --project ECommerce.Catalog.Api --no-build --no-launch-profile '-p:Platform=AnyCPU' -- --migrate
-dotnet run --project ECommerce.Catalog.Api --launch-profile http '-p:Platform=AnyCPU'
+dotnet run --project src/ECommerce.Catalog.Api --no-build --no-launch-profile '-p:Platform=AnyCPU' -- --migrate
+dotnet run --project src/ECommerce.Catalog.Api --launch-profile http '-p:Platform=AnyCPU'
 ```
 
 The --migrate mode applies migrations and exits; normal API startup does not modify
@@ -271,7 +271,7 @@ For EF migration development, install the CLI once:
 ```powershell
 dotnet tool install --tool-path .tools dotnet-ef --version 10.0.12
 $env:Platform = 'AnyCPU'
-.\.tools\dotnet-ef.exe migrations add MigrationName --project ECommerce.Catalog.Infrastructure --startup-project ECommerce.Catalog.Api --output-dir Persistence/Migrations
+.\.tools\dotnet-ef.exe migrations add MigrationName --project src/ECommerce.Catalog.Infrastructure --startup-project ECommerce.Catalog.Api --output-dir Persistence/Migrations
 ```
 
 AddCatalogConcurrency records the concurrency mapping in the model snapshot and

@@ -173,21 +173,21 @@ Build and apply migrations explicitly:
 
 ```powershell
 dotnet build ECommerce.slnx '-p:Platform=Any CPU'
-dotnet run --project ECommerce.Catalog.Api --no-build --no-launch-profile '-p:Platform=AnyCPU' -- --migrate
-dotnet run --project ECommerce.Inventory.Api --no-build --no-launch-profile '-p:Platform=AnyCPU' -- --migrate
-dotnet run --project ECommerce.Order.Api --no-build --no-launch-profile '-p:Platform=AnyCPU' -- --migrate
+dotnet run --project src/ECommerce.Catalog.Api --no-build --no-launch-profile '-p:Platform=AnyCPU' -- --migrate
+dotnet run --project src/ECommerce.Inventory.Api --no-build --no-launch-profile '-p:Platform=AnyCPU' -- --migrate
+dotnet run --project src/ECommerce.Order.Api --no-build --no-launch-profile '-p:Platform=AnyCPU' -- --migrate
 ```
 
 Start each API in its own terminal:
 
 ```powershell
-dotnet run --project ECommerce.Catalog.Api --launch-profile http '-p:Platform=AnyCPU'
-dotnet run --project ECommerce.Inventory.Api --launch-profile http '-p:Platform=AnyCPU'
-dotnet run --project ECommerce.Order.Api --launch-profile http '-p:Platform=AnyCPU'
+dotnet run --project src/ECommerce.Catalog.Api --launch-profile http '-p:Platform=AnyCPU'
+dotnet run --project src/ECommerce.Inventory.Api --launch-profile http '-p:Platform=AnyCPU'
+dotnet run --project src/ECommerce.Order.Api --launch-profile http '-p:Platform=AnyCPU'
 ```
 
-Use ECommerce.Inventory.Api/ECommerce.Inventory.Api.http and
-ECommerce.Order.Api/ECommerce.Order.Api.http for request examples. First create a
+Use src/ECommerce.Inventory.Api/ECommerce.Inventory.Api.http and
+src/ECommerce.Order.Api/ECommerce.Order.Api.http for request examples. First create a
 category/product in Catalog, initialize its Inventory stock, then place an order.
 
 ## Docker

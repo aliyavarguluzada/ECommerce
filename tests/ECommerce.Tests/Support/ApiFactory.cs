@@ -13,7 +13,7 @@ public sealed class ApiFactory<TProgram>(Action<IServiceCollection>? configure =
     {
         TestCredentials.Initialize();
         builder.UseEnvironment("Development");
-        builder.UseContentRoot(Path.GetFullPath(Path.Combine(AppContext.BaseDirectory, "../../../../../", typeof(TProgram).Assembly.GetName().Name!)));
+        builder.UseContentRoot(Path.GetFullPath(Path.Combine(AppContext.BaseDirectory, "../../../../../src", typeof(TProgram).Assembly.GetName().Name!)));
         builder.ConfigureLogging(logging => logging.ClearProviders());
         if (configure is not null) builder.ConfigureServices(configure);
     }

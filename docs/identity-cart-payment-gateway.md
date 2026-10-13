@@ -82,7 +82,7 @@ The first administrator is an explicit bootstrap operation after Identity migrat
 ```powershell
 $env:BootstrapAdmin__Email = 'your-admin@example.com'
 $env:BootstrapAdmin__Password = 'CHOOSE-YOUR-OWN-STRONG-PASSWORD'
-dotnet run --project ECommerce.Identity.Api --no-build --no-launch-profile '-p:Platform=AnyCPU' -- --bootstrap-admin
+dotnet run --project src/ECommerce.Identity.Api --no-build --no-launch-profile '-p:Platform=AnyCPU' -- --bootstrap-admin
 Remove-Item Env:BootstrapAdmin__Email, Env:BootstrapAdmin__Password
 ```
 
@@ -201,7 +201,7 @@ be overridden with environment variables. Gateway requests are rate-limited to
 http://localhost:3000); wildcard credentialed CORS is not enabled. JWT authorization
 headers are forwarded to backends. /health/live is public.
 
-ECommerce.ApiGateway/ECommerce.ApiGateway.http contains the complete authenticated
+src/ECommerce.ApiGateway/ECommerce.ApiGateway.http contains the complete authenticated
 development checkout flow, with placeholder tokens and IDs.
 
 ## Databases and migrations
@@ -212,10 +212,10 @@ snapshots, payments, and Order payment fields. They are generated but not applie
 
 ```powershell
 dotnet build ECommerce.slnx '-p:Platform=Any CPU'
-dotnet run --project ECommerce.Identity.Api --no-build --no-launch-profile '-p:Platform=AnyCPU' -- --migrate
-dotnet run --project ECommerce.Cart.Api --no-build --no-launch-profile '-p:Platform=AnyCPU' -- --migrate
-dotnet run --project ECommerce.Payment.Api --no-build --no-launch-profile '-p:Platform=AnyCPU' -- --migrate
-dotnet run --project ECommerce.Order.Api --no-build --no-launch-profile '-p:Platform=AnyCPU' -- --migrate
+dotnet run --project src/ECommerce.Identity.Api --no-build --no-launch-profile '-p:Platform=AnyCPU' -- --migrate
+dotnet run --project src/ECommerce.Cart.Api --no-build --no-launch-profile '-p:Platform=AnyCPU' -- --migrate
+dotnet run --project src/ECommerce.Payment.Api --no-build --no-launch-profile '-p:Platform=AnyCPU' -- --migrate
+dotnet run --project src/ECommerce.Order.Api --no-build --no-launch-profile '-p:Platform=AnyCPU' -- --migrate
 ```
 
 Apply Catalog and Inventory migrations as described in their documentation.

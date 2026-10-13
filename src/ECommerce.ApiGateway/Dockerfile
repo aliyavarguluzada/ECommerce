@@ -6,11 +6,11 @@ EXPOSE 8080
 FROM mcr.microsoft.com/dotnet/sdk:10.0 AS build
 ARG BUILD_CONFIGURATION=Release
 WORKDIR /src
-COPY ["ECommerce.ApiGateway/ECommerce.ApiGateway.csproj", "ECommerce.ApiGateway/"]
-COPY ["ECommerce.Security/ECommerce.Security.csproj", "ECommerce.Security/"]
-RUN dotnet restore "ECommerce.ApiGateway/ECommerce.ApiGateway.csproj"
+COPY ["src/ECommerce.ApiGateway/ECommerce.ApiGateway.csproj", "src/ECommerce.ApiGateway/"]
+COPY ["src/ECommerce.Security/ECommerce.Security.csproj", "src/ECommerce.Security/"]
+RUN dotnet restore "src/ECommerce.ApiGateway/ECommerce.ApiGateway.csproj"
 COPY . .
-WORKDIR "/src/ECommerce.ApiGateway"
+WORKDIR "/src/src/ECommerce.ApiGateway"
 RUN dotnet build "ECommerce.ApiGateway.csproj" -c $BUILD_CONFIGURATION -o /app/build -p:Platform=AnyCPU
 
 FROM build AS publish

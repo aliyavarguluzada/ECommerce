@@ -7,13 +7,13 @@
 <PackageReference Include="Microsoft.EntityFrameworkCore" Version="10.0.12"/>
 <PackageReference Include="Microsoft.EntityFrameworkCore.Relational" Version="10.0.12"/>
 <ProjectReference Include="../ECommerce.Testing/ECommerce.Testing.csproj"/>
-<ProjectReference Include="../../ECommerce.Catalog.Api/ECommerce.Catalog.Api.csproj"/>
-<ProjectReference Include="../../ECommerce.Inventory.Api/ECommerce.Inventory.Api.csproj"/>
-<ProjectReference Include="../../ECommerce.Order.Api/ECommerce.Order.Api.csproj"/>
-<ProjectReference Include="../../ECommerce.Identity.Api/ECommerce.Identity.Api.csproj"/>
-<ProjectReference Include="../../ECommerce.Cart.Api/ECommerce.Cart.Api.csproj"/>
-<ProjectReference Include="../../ECommerce.Payment.Api/ECommerce.Payment.Api.csproj"/>
-<ProjectReference Include="../../ECommerce.ApiGateway/ECommerce.ApiGateway.csproj"/>
+<ProjectReference Include="../../src/ECommerce.Catalog.Api/ECommerce.Catalog.Api.csproj"/>
+<ProjectReference Include="../../src/ECommerce.Inventory.Api/ECommerce.Inventory.Api.csproj"/>
+<ProjectReference Include="../../src/ECommerce.Order.Api/ECommerce.Order.Api.csproj"/>
+<ProjectReference Include="../../src/ECommerce.Identity.Api/ECommerce.Identity.Api.csproj"/>
+<ProjectReference Include="../../src/ECommerce.Cart.Api/ECommerce.Cart.Api.csproj"/>
+<ProjectReference Include="../../src/ECommerce.Payment.Api/ECommerce.Payment.Api.csproj"/>
+<ProjectReference Include="../../src/ECommerce.ApiGateway/ECommerce.ApiGateway.csproj"/>
 </ItemGroup>
 <ItemGroup>
 <Compile Include="../ECommerce.Catalog.Checks/CategoryApiChecks.cs" Link="Catalog/CategoryApiChecks.cs"/>

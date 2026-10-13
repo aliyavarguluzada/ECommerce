@@ -7,8 +7,8 @@
   </PropertyGroup>
   <ItemGroup>
     <ProjectReference Include="../ECommerce.Testing/ECommerce.Testing.csproj" />
-    <ProjectReference Include="..\..\ECommerce.Catalog.Api\ECommerce.Catalog.Api.csproj" />
+    <ProjectReference Include="..\..\src\ECommerce.Catalog.Api\ECommerce.Catalog.Api.csproj" />
     <PackageReference Include="Microsoft.AspNetCore.Mvc.Testing" Version="10.0.12" />
-    <ProjectReference Include="..\..\ECommerce.Catalog.Infrastructure\ECommerce.Catalog.Infrastructure.csproj" />
+    <ProjectReference Include="..\..\src\ECommerce.Catalog.Infrastructure\ECommerce.Catalog.Infrastructure.csproj" />
   </ItemGroup>
 </Project>

@@ -157,7 +157,7 @@ internal static class PostgreSqlIntegrationChecks
         protected override void ConfigureWebHost(IWebHostBuilder builder)
         {
             builder.UseEnvironment("Production");
-            builder.UseContentRoot(Path.GetFullPath(Path.Combine(AppContext.BaseDirectory, "../../../../../ECommerce.Catalog.Api")));
+            builder.UseContentRoot(Path.GetFullPath(Path.Combine(AppContext.BaseDirectory, "../../../../../src/ECommerce.Catalog.Api")));
             builder.UseSetting("ConnectionStrings:CatalogDatabase", connection);
             builder.ConfigureLogging(logging => logging.ClearProviders());
         }

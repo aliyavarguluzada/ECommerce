@@ -24,7 +24,9 @@ public static class SecurityExtensions
     public static string LocalConfigurationPath(string contentRoot, string filename)
     {
         var local = Path.Combine(contentRoot, filename);
-        return File.Exists(local) ? local : Path.GetFullPath(Path.Combine(contentRoot, "..", filename));
+        if (File.Exists(local)) return local;
+        var parent = Path.GetFullPath(Path.Combine(contentRoot, "..", filename));
+        return File.Exists(parent) ? parent : Path.GetFullPath(Path.Combine(contentRoot, "..", "..", filename));
     }
     public static IServiceCollection AddCommerceSecurity(this IServiceCollection services, IConfiguration config, bool migration = false)
     {
