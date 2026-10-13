@@ -35,20 +35,22 @@ subgraph group_entry["Gateway and identity"]
   node_security["Token security"]
 end
 
-subgraph group_catalog["Catalog"]
-  node_catalog_api["Catalog API"]
+subgraph group_catalog["Catalog management"]
+  node_catalog_api["Product API"]
   node_category_api["Category API"]
   node_catalog_handlers["Catalog handlers"]
   node_catalog_domain["Product and category rules<br/>[Product.cs]"]
   node_catalog_store[("Catalog persistence")]
 end
 
-subgraph group_checkout["Cart and orders"]
+subgraph group_commerce["Cart and orders"]
   node_cart_api["Cart API<br/>[CartController.cs]"]
   node_cart_service["Cart and checkout<br/>[CartService.cs]"]
+  node_cart_domain["Shopping cart state<br/>[ShoppingCart.cs]"]
   node_cart_db[("Cart database<br/>[CartDbContext.cs]")]
   node_order_api["Order API"]
   node_order_service["Order coordination<br/>[OrderService.cs]"]
+  node_order_domain["Order lifecycle<br/>[PurchaseOrder.cs]"]
   node_order_db[("Order database<br/>[OrderDbContext.cs]")]
   node_order_recovery["Order recovery"]
 end
@@ -63,7 +65,7 @@ subgraph group_payment["Payments"]
   node_payment_api["Payment API"]
   node_payment_service["Payment processing<br/>[PaymentService.cs]"]
   node_payment_db[("Payment database")]
-  node_payment_provider["Development provider"]
+  node_provider["Development payment provider"]
 end
 
 node_customer(("Customer"))
@@ -79,18 +81,20 @@ node_gateway -->|"routes requests"| node_inventory_api
 node_gateway -->|"routes requests"| node_payment_api
 node_identity_api -->|"delegates identity"| node_identity_service
 node_identity_service -->|"reads and writes"| node_identity_db
-node_security -.->|"authenticates"| node_identity_api
+node_security -.->|"secures endpoints"| node_identity_api
 node_catalog_api -->|"dispatches requests"| node_catalog_handlers
 node_category_api -->|"dispatches requests"| node_catalog_handlers
-node_catalog_handlers -->|"applies domain rules"| node_catalog_domain
+node_catalog_handlers -->|"applies rules"| node_catalog_domain
 node_catalog_handlers -.->|"persists catalog"| node_catalog_store
 node_cart_api -->|"calls service"| node_cart_service
+node_cart_service -->|"updates cart state"| node_cart_domain
 node_cart_service -.->|"stores cart state"| node_cart_db
 node_cart_service -.->|"checks products"| node_catalog_api
 node_cart_service -.->|"creates orders"| node_order_api
 node_order_api -->|"calls service"| node_order_service
+node_order_service -->|"advances lifecycle"| node_order_domain
 node_order_service -.->|"stores order state"| node_order_db
-node_order_service -.->|"snapshots prices"| node_catalog_api
+node_order_service -.->|"gets product data"| node_catalog_api
 node_order_service -.->|"reserves stock"| node_inventory_api
 node_order_service -.->|"requests refunds"| node_payment_api
 node_order_recovery -->|"retries workflows"| node_order_service
@@ -98,7 +102,7 @@ node_inventory_api -->|"calls service"| node_inventory_service
 node_inventory_service -.->|"stores stock state"| node_inventory_db
 node_payment_api -->|"calls service"| node_payment_service
 node_payment_service -.->|"stores payment state"| node_payment_db
-node_payment_service -.->|"processes charges"| node_payment_provider
+node_payment_service -.->|"processes charges"| node_provider
 node_payment_service -.->|"confirms payment"| node_order_api
 
 end
@@ -116,9 +120,11 @@ click node_catalog_domain "https://github.com/aliyavarguluzada/ecommerce/blob/ma
 click node_catalog_store "https://github.com/aliyavarguluzada/ecommerce/blob/master/src/ECommerce.Catalog.Infrastructure/Persistence/CatalogDbContext.cs"
 click node_cart_api "https://github.com/aliyavarguluzada/ecommerce/blob/master/src/ECommerce.Cart.Api/Controllers/CartController.cs"
 click node_cart_service "https://github.com/aliyavarguluzada/ecommerce/blob/master/src/ECommerce.Cart.Application/CartService.cs"
+click node_cart_domain "https://github.com/aliyavarguluzada/ecommerce/blob/master/src/ECommerce.Cart.Domain/ShoppingCart.cs"
 click node_cart_db "https://github.com/aliyavarguluzada/ecommerce/blob/master/src/ECommerce.Cart.Infrastructure/CartDbContext.cs"
 click node_order_api "https://github.com/aliyavarguluzada/ecommerce/blob/master/src/ECommerce.Order.Api/Controllers/OrdersController.cs"
 click node_order_service "https://github.com/aliyavarguluzada/ecommerce/blob/master/src/ECommerce.Order.Application/OrderService.cs"
+click node_order_domain "https://github.com/aliyavarguluzada/ecommerce/blob/master/src/ECommerce.Order.Domain/PurchaseOrder.cs"
 click node_order_db "https://github.com/aliyavarguluzada/ecommerce/blob/master/src/ECommerce.Order.Infrastructure/OrderDbContext.cs"
 click node_order_recovery "https://github.com/aliyavarguluzada/ecommerce/blob/master/src/ECommerce.Order.Api/Common/OrderRecoveryWorker.cs"
 click node_inventory_api "https://github.com/aliyavarguluzada/ecommerce/blob/master/src/ECommerce.Inventory.Api/Controllers/ReservationsController.cs"
@@ -127,7 +133,7 @@ click node_inventory_db "https://github.com/aliyavarguluzada/ecommerce/blob/mast
 click node_payment_api "https://github.com/aliyavarguluzada/ecommerce/blob/master/src/ECommerce.Payment.Api/Controllers/PaymentsController.cs"
 click node_payment_service "https://github.com/aliyavarguluzada/ecommerce/blob/master/src/ECommerce.Payment.Application/PaymentService.cs"
 click node_payment_db "https://github.com/aliyavarguluzada/ecommerce/blob/master/src/ECommerce.Payment.Infrastructure/PaymentDbContext.cs"
-click node_payment_provider "https://github.com/aliyavarguluzada/ecommerce/blob/master/src/ECommerce.Payment.Infrastructure/DevelopmentPaymentProvider.cs"
+click node_provider "https://github.com/aliyavarguluzada/ecommerce/blob/master/src/ECommerce.Payment.Infrastructure/DevelopmentPaymentProvider.cs"
 
 classDef toneNeutral fill:#f8fafc,stroke:#334155,stroke-width:1.5px,color:#0f172a
 classDef toneBlue fill:#dbeafe,stroke:#2563eb,stroke-width:1.5px,color:#172554
@@ -138,9 +144,9 @@ classDef toneIndigo fill:#e0e7ff,stroke:#4f46e5,stroke-width:1.5px,color:#312e81
 classDef toneTeal fill:#ccfbf1,stroke:#0f766e,stroke-width:1.5px,color:#134e4a
 class node_gateway,node_identity_api,node_identity_service,node_identity_db,node_security toneBlue
 class node_catalog_api,node_category_api,node_catalog_handlers,node_catalog_domain,node_catalog_store toneAmber
-class node_cart_api,node_cart_service,node_cart_db,node_order_api,node_order_service,node_order_db,node_order_recovery toneMint
+class node_cart_api,node_cart_service,node_cart_domain,node_cart_db,node_order_api,node_order_service,node_order_domain,node_order_db,node_order_recovery toneMint
 class node_inventory_api,node_inventory_service,node_inventory_db toneRose
-class node_payment_api,node_payment_service,node_payment_db,node_payment_provider,node_customer,node_admin toneIndigo
+class node_payment_api,node_payment_service,node_payment_db,node_provider,node_customer,node_admin toneIndigo
 ```
 
 ## Identity, Cart, Payment, and Gateway
