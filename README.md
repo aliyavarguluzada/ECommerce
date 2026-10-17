@@ -35,8 +35,9 @@ flowchart TD
 subgraph architecture_canvas[" "]
 direction TD
 
-subgraph group_entry["Gateway and identity"]
+subgraph group_entry["Storefront and identity"]
   node_gateway["API gateway<br/>[Program.cs]"]
+  node_storefront["Storefront workspace<br/>[app.js]"]
   node_identity_api["Identity API"]
   node_identity_service["Identity service<br/>[IdentityService.cs]"]
   node_identity_db[("Identity database")]
@@ -44,7 +45,7 @@ subgraph group_entry["Gateway and identity"]
 end
 
 subgraph group_catalog["Catalog management"]
-  node_catalog_api["Product API"]
+  node_product_api["Product API"]
   node_category_api["Category API"]
   node_catalog_handlers["Catalog handlers"]
   node_catalog_domain["Product and category rules<br/>[Product.cs]"]
@@ -69,40 +70,45 @@ subgraph group_inventory["Inventory"]
   node_inventory_db[("Inventory database")]
 end
 
-subgraph group_payment["Payments"]
+subgraph group_payments["Payments"]
   node_payment_api["Payment API"]
   node_payment_service["Payment processing<br/>[PaymentService.cs]"]
   node_payment_db[("Payment database")]
   node_provider["Development payment provider"]
+  node_payment_recovery["Payment recovery"]
 end
 
 node_customer(("Customer"))
 node_admin(("Administrator"))
 
+node_customer -->|"uses"| node_storefront
+node_admin -->|"manages through"| node_storefront
+node_storefront -.->|"accesses"| node_gateway
 node_customer -->|"requests APIs"| node_gateway
-node_admin -->|"manages APIs"| node_gateway
+node_admin -->|"requests APIs"| node_gateway
 node_gateway -->|"routes requests"| node_identity_api
-node_gateway -->|"routes requests"| node_catalog_api
+node_gateway -->|"routes requests"| node_product_api
+node_gateway -->|"routes requests"| node_category_api
 node_gateway -->|"routes requests"| node_cart_api
 node_gateway -->|"routes requests"| node_order_api
 node_gateway -->|"routes requests"| node_inventory_api
 node_gateway -->|"routes requests"| node_payment_api
 node_identity_api -->|"delegates identity"| node_identity_service
 node_identity_service -->|"reads and writes"| node_identity_db
-node_security -.->|"secures endpoints"| node_identity_api
-node_catalog_api -->|"dispatches requests"| node_catalog_handlers
+node_security -->|"secures endpoints"| node_identity_api
+node_product_api -->|"dispatches requests"| node_catalog_handlers
 node_category_api -->|"dispatches requests"| node_catalog_handlers
-node_catalog_handlers -->|"applies rules"| node_catalog_domain
+node_catalog_handlers -.->|"applies rules"| node_catalog_domain
 node_catalog_handlers -.->|"persists catalog"| node_catalog_store
 node_cart_api -->|"calls service"| node_cart_service
 node_cart_service -->|"updates cart state"| node_cart_domain
 node_cart_service -.->|"stores cart state"| node_cart_db
-node_cart_service -.->|"checks products"| node_catalog_api
+node_cart_service -.->|"checks products"| node_product_api
 node_cart_service -.->|"creates orders"| node_order_api
 node_order_api -->|"calls service"| node_order_service
 node_order_service -->|"advances lifecycle"| node_order_domain
 node_order_service -.->|"stores order state"| node_order_db
-node_order_service -.->|"gets product data"| node_catalog_api
+node_order_service -.->|"gets product data"| node_product_api
 node_order_service -.->|"reserves stock"| node_inventory_api
 node_order_service -.->|"requests refunds"| node_payment_api
 node_order_recovery -->|"retries workflows"| node_order_service
@@ -112,16 +118,18 @@ node_payment_api -->|"calls service"| node_payment_service
 node_payment_service -.->|"stores payment state"| node_payment_db
 node_payment_service -.->|"processes charges"| node_provider
 node_payment_service -.->|"confirms payment"| node_order_api
+node_payment_recovery -.->|"recovers payments"| node_payment_service
 
 end
 style architecture_canvas fill:#F2E6FF,stroke:#c4b5fd,stroke-width:1px,color:#0f172a
 
 click node_gateway "https://github.com/aliyavarguluzada/ecommerce/blob/master/src/ECommerce.ApiGateway/Program.cs"
+click node_storefront "https://github.com/aliyavarguluzada/ecommerce/blob/master/src/ECommerce.ApiGateway/wwwroot/shop/app.js"
 click node_identity_api "https://github.com/aliyavarguluzada/ecommerce/blob/master/src/ECommerce.Identity.Api/Controllers/IdentityController.cs"
 click node_identity_service "https://github.com/aliyavarguluzada/ecommerce/blob/master/src/ECommerce.Identity.Infrastructure/IdentityService.cs"
 click node_identity_db "https://github.com/aliyavarguluzada/ecommerce/blob/master/src/ECommerce.Identity.Infrastructure/IdentityDbContext.cs"
 click node_security "https://github.com/aliyavarguluzada/ecommerce/blob/master/src/ECommerce.Security/SecurityExtensions.cs"
-click node_catalog_api "https://github.com/aliyavarguluzada/ecommerce/blob/master/src/ECommerce.Catalog.Api/Products/ProductController.cs"
+click node_product_api "https://github.com/aliyavarguluzada/ecommerce/blob/master/src/ECommerce.Catalog.Api/Products/ProductController.cs"
 click node_category_api "https://github.com/aliyavarguluzada/ecommerce/blob/master/src/ECommerce.Catalog.Api/Categories/CategoryController.cs"
 click node_catalog_handlers "https://github.com/aliyavarguluzada/ecommerce/tree/master/src/ECommerce.Catalog.Application"
 click node_catalog_domain "https://github.com/aliyavarguluzada/ecommerce/blob/master/src/ECommerce.Catalog.Domain/Aggregates/Products/Product.cs"
@@ -142,6 +150,7 @@ click node_payment_api "https://github.com/aliyavarguluzada/ecommerce/blob/maste
 click node_payment_service "https://github.com/aliyavarguluzada/ecommerce/blob/master/src/ECommerce.Payment.Application/PaymentService.cs"
 click node_payment_db "https://github.com/aliyavarguluzada/ecommerce/blob/master/src/ECommerce.Payment.Infrastructure/PaymentDbContext.cs"
 click node_provider "https://github.com/aliyavarguluzada/ecommerce/blob/master/src/ECommerce.Payment.Infrastructure/DevelopmentPaymentProvider.cs"
+click node_payment_recovery "https://github.com/aliyavarguluzada/ecommerce/blob/master/src/ECommerce.Payment.Api/Common/PaymentRecoveryWorker.cs"
 
 classDef toneNeutral fill:#f8fafc,stroke:#334155,stroke-width:1.5px,color:#0f172a
 classDef toneBlue fill:#dbeafe,stroke:#2563eb,stroke-width:1.5px,color:#172554
@@ -150,11 +159,11 @@ classDef toneMint fill:#dcfce7,stroke:#16a34a,stroke-width:1.5px,color:#14532d
 classDef toneRose fill:#ffe4e6,stroke:#e11d48,stroke-width:1.5px,color:#881337
 classDef toneIndigo fill:#e0e7ff,stroke:#4f46e5,stroke-width:1.5px,color:#312e81
 classDef toneTeal fill:#ccfbf1,stroke:#0f766e,stroke-width:1.5px,color:#134e4a
-class node_gateway,node_identity_api,node_identity_service,node_identity_db,node_security toneBlue
-class node_catalog_api,node_category_api,node_catalog_handlers,node_catalog_domain,node_catalog_store toneAmber
+class node_gateway,node_storefront,node_identity_api,node_identity_service,node_identity_db,node_security toneBlue
+class node_product_api,node_category_api,node_catalog_handlers,node_catalog_domain,node_catalog_store toneAmber
 class node_cart_api,node_cart_service,node_cart_domain,node_cart_db,node_order_api,node_order_service,node_order_domain,node_order_db,node_order_recovery toneMint
 class node_inventory_api,node_inventory_service,node_inventory_db toneRose
-class node_payment_api,node_payment_service,node_payment_db,node_provider,node_customer,node_admin toneIndigo
+class node_payment_api,node_payment_service,node_payment_db,node_provider,node_payment_recovery,node_customer,node_admin toneIndigo
 ```
 
 ## Identity, Cart, Payment, and Gateway
