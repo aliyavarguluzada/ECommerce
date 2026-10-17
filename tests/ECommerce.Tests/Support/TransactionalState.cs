@@ -4,21 +4,21 @@ using System.Runtime.CompilerServices;
 
 namespace ECommerce.Tests.Support;
 
-// Test repository state is copied on transaction entry and published only on commit.
+// Test service state is copied on transaction entry and published only on commit.
 
 // This models rollback without copying the production SQL/locking implementation.
 
-public abstract class TransactionalState<T>
+public class TransactionalState<T>
 
     where T : new()
 {
     public T Data { get; private set; } = new();
 
-    protected T Current => _work is null ? Data : _work;
+    public T Current => _work is null ? Data : _work;
 
     private T? _work;
 
-    protected Lease Start()
+    public Lease Start()
     {
         if (_work is not null)
         {
@@ -31,7 +31,7 @@ public abstract class TransactionalState<T>
         return new Lease(() => Data = Graph.Copy(_work), () => _work = default);
     }
 
-    protected sealed class Lease(Action commit, Action dispose)
+    public sealed class Lease(Action commit, Action dispose)
     {
         public Task Commit(CancellationToken ct)
         {

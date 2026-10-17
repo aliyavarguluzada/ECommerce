@@ -1,7 +1,5 @@
-using ECommerce.Catalog.Application.Abstractions;
+using ECommerce.Catalog.Application;
 using ECommerce.Catalog.Infrastructure.Persistence;
-using ECommerce.Catalog.Infrastructure.Persistence.Repositories;
-using ECommerce.Catalog.Infrastructure.Persistence.Queries;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 
@@ -13,13 +11,7 @@ public static class DependencyInjection
     {
         services.AddDbContext<CatalogDbContext>(options => options.UseNpgsql(connectionString));
 
-        services.AddScoped<ICategoryRepository, CategoryRepository>();
-
-        services.AddScoped<IProductRepository, ProductRepository>();
-
-        services.AddScoped<IProductQueries, ProductQueries>();
-
-        services.AddScoped<IUnitOfWork>(provider => provider.GetRequiredService<CatalogDbContext>());
+        services.AddScoped<ICatalogService, CatalogService>();
 
         return services;
     }

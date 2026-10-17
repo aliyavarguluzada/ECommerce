@@ -19,7 +19,7 @@ public sealed class IdentityService(
     SignInManager<ApplicationUser> signIn,
     IConfiguration config) : IIdentityService
 {
-    public async Task<TokenResponse> RegisterAsync(RegisterCommand command, CancellationToken ct)
+    public async Task<TokenResponse> RegisterAsync(RegisterRequest command, CancellationToken ct)
     {
         if (command.Email.Trim().Length > 256 || command.Password.Length > 1024)
         {
@@ -54,7 +54,7 @@ public sealed class IdentityService(
         return token;
     }
 
-    public async Task<TokenResponse> LoginAsync(LoginCommand command, CancellationToken ct)
+    public async Task<TokenResponse> LoginAsync(LoginRequest command, CancellationToken ct)
     {
         if (command.Email.Trim().Length > 256 || command.Password.Length > 1024)
         {
@@ -182,7 +182,7 @@ public sealed class IdentityService(
 
     public async Task<UserProfile> GetAsync(Guid id, CancellationToken ct) => await Profile(await User(id));
 
-    public async Task<UserProfile> UpdateProfileAsync(Guid id, ProfileCommand command, CancellationToken ct)
+    public async Task<UserProfile> UpdateProfileAsync(Guid id, ProfileRequest command, CancellationToken ct)
     {
         var user = await User(id);
 
@@ -193,7 +193,7 @@ public sealed class IdentityService(
         return await Profile(user);
     }
 
-    public async Task ChangePasswordAsync(Guid id, ChangePasswordCommand command, CancellationToken ct)
+    public async Task ChangePasswordAsync(Guid id, ChangePasswordRequest command, CancellationToken ct)
     {
         if (command.CurrentPassword.Length > 1024 || command.NewPassword.Length > 1024)
         {

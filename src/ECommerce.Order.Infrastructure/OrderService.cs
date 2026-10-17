@@ -1,40 +1,43 @@
+using ECommerce.Order.Application;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Storage;
 using System.Security.Cryptography;
 using System.Text;
 using System.Text.Json;
 using ECommerce.Order.Domain;
 
-namespace ECommerce.Order.Application;
+namespace ECommerce.Order.Infrastructure;
 
-public sealed class OrderService(
-    IOrderStore store,
+public class OrderService(
+    OrderDbContext db,
     ICatalogClient catalog,
     IInventoryClient inventory,
-    IPaymentClient payments)
+    IPaymentClient payments) : IOrderService
 {
-    public async Task<OrderResponse> CreateAsync(CreateOrderCommand command, CancellationToken ct)
+    public async Task<OrderResponse> CreateAsync(CreateOrderRequest request, CancellationToken ct)
     {
-        if (command.RequestId == Guid.Empty || command.CustomerId == Guid.Empty || command.ShippingAddress is null || command.Items is null || command.Items.Count is < 1 or > 100 || command.Items.Any(
-            x => x is null || x.ProductId == Guid.Empty || x.Quantity is < 1 or > 100000) || command.Items.Select(
-            x => x.ProductId).Distinct().Count() != command.Items.Count)
+        if (request.RequestId == Guid.Empty || request.CustomerId == Guid.Empty || request.ShippingAddress is null || request.Items is null || request.Items.Count is < 1 or > 100 || request.Items.Any(
+            x => x is null || x.ProductId == Guid.Empty || x.Quantity is < 1 or > 100000) || request.Items.Select(
+            x => x.ProductId).Distinct().Count() != request.Items.Count)
         {
             throw new DomainException("Request ID, customer, valid address, and 1–100 distinct products with quantities 1–100000 are required.");
 
         }
 
-        var address = command.ShippingAddress.ToDomain();
+        var address = request.ShippingAddress.ToDomain();
 
         var fingerprint = Convert.ToHexString(
             SHA256.HashData(
                 Encoding.UTF8.GetBytes(
                     JsonSerializer.Serialize(
                         new {
-                            command.CustomerId,
+                            request.CustomerId,
                             Address = address,
-                            Items = command.Items.OrderBy(x => x.ProductId).ToArray() }))));
+                            Items = request.Items.OrderBy(x => x.ProductId).ToArray() }))));
 
-        await using (var tx = await store.BeginAsync(command.RequestId, ct))
+        await using (var tx = await BeginTransactionAsync(request.RequestId, ct))
         {
-            var existing = await store.FindAsync(command.RequestId, ct);
+            var existing = await FindAsync(request.RequestId, ct);
 
             if (existing is not null)
             {
@@ -54,7 +57,7 @@ public sealed class OrderService(
 
                 string? currency = null;
 
-                foreach (var item in command.Items.OrderBy(x => x.ProductId))
+                foreach (var item in request.Items.OrderBy(x => x.ProductId))
                 {
                     var product = await catalog.GetAsync(item.ProductId, ct);
 
@@ -76,16 +79,16 @@ public sealed class OrderService(
 
                 }
 
-                store.Add(
+                Add(
                     PurchaseOrder.Create(
-                        command.RequestId,
-                        command.CustomerId,
+                        request.RequestId,
+                        request.CustomerId,
                         fingerprint,
                         currency!,
                         address,
                         lines));
 
-                await store.SaveAsync(ct);
+                await SaveChangesAsync(ct);
 
                 await tx.CommitAsync(ct);
 
@@ -95,12 +98,12 @@ public sealed class OrderService(
 
         try
         {
-            return await RetryAsync(command.RequestId, ct);
+            return await RetryAsync(request.RequestId, ct);
         }
 
         catch (ServiceException error)when (error.StatusCode is 503 or 409)
         {
-            return await GetAsync(command.RequestId, ct);
+            return await GetAsync(request.RequestId, ct);
         }
 
     }
@@ -124,12 +127,12 @@ public sealed class OrderService(
 
         }
 
-        return store.ListAsync(page, size, customerId, status, ct);
+        return ReadListAsync(page, size, customerId, status, ct);
     }
 
     public async Task<OrderResponse> ConfirmAsync(Guid id, CancellationToken ct)
     {
-        await using (var tx = await store.BeginAsync(id, ct))
+        await using (var tx = await BeginTransactionAsync(id, ct))
         {
             var order = await Required(id, ct);
 
@@ -144,7 +147,7 @@ public sealed class OrderService(
             {
                 order.BeginConfirmation();
 
-                await store.SaveAsync(ct);
+                await SaveChangesAsync(ct);
 
             }
 
@@ -155,9 +158,9 @@ public sealed class OrderService(
         return await RetryAsync(id, ct);
     }
 
-    public async Task<OrderResponse> CancelAsync(Guid id, CancelOrderCommand command, CancellationToken ct)
+    public async Task<OrderResponse> CancelAsync(Guid id, CancelOrderRequest request, CancellationToken ct)
     {
-        await using (var tx = await store.BeginAsync(id, ct))
+        await using (var tx = await BeginTransactionAsync(id, ct))
         {
             var order = await Required(id, ct);
 
@@ -170,13 +173,13 @@ public sealed class OrderService(
 
             if (order.Status != OrderStatus.Cancelling)
             {
-                order.BeginCancellation(command.Reason);
+                order.BeginCancellation(request.Reason);
 
-                await store.SaveAsync(ct);
+                await SaveChangesAsync(ct);
 
             }
 
-            else if (order.CancellationReason != command.Reason?.Trim())
+            else if (order.CancellationReason != request.Reason?.Trim())
             {
                 throw new ServiceException(409, "Cancellation is already in progress with a different reason.");
 
@@ -189,13 +192,13 @@ public sealed class OrderService(
         return await RetryAsync(id, ct);
     }
 
-    public async Task<OrderResponse> RecordPaymentAsync(Guid id, RecordPaymentCommand command, CancellationToken ct)
+    public async Task<OrderResponse> RecordPaymentAsync(Guid id, RecordPaymentRequest request, CancellationToken ct)
     {
-        await using (var tx = await store.BeginAsync(id, ct))
+        await using (var tx = await BeginTransactionAsync(id, ct))
         {
             var order = await Required(id, ct);
 
-            order.RecordPayment(command.PaymentId, command.Amount, command.Currency);
+            order.RecordPayment(request.PaymentId, request.Amount, request.Currency);
 
             if (order.Status == OrderStatus.Reserved)
             {
@@ -209,7 +212,7 @@ public sealed class OrderService(
 
             }
 
-            await store.SaveAsync(ct);
+            await SaveChangesAsync(ct);
 
             await tx.CommitAsync(ct);
 
@@ -220,7 +223,7 @@ public sealed class OrderService(
 
     public async Task<OrderResponse> RetryAsync(Guid id, CancellationToken ct)
     {
-        await using var tx = await store.BeginAsync(id, ct);
+        await using var tx = await BeginTransactionAsync(id, ct);
 
         var order = await Required(id, ct);
 
@@ -292,22 +295,22 @@ public sealed class OrderService(
                 return OrderResponse.From(order);
         }
 
-        await store.SaveAsync(ct);
+        await SaveChangesAsync(ct);
 
         await tx.CommitAsync(ct);
 
         return OrderResponse.From(order);
     }
 
-    public async Task<OrderResponse> ShipAsync(Guid id, ShipOrderCommand command, CancellationToken ct)
+    public async Task<OrderResponse> ShipAsync(Guid id, ShipOrderRequest request, CancellationToken ct)
     {
-        await using var tx = await store.BeginAsync(id, ct);
+        await using var tx = await BeginTransactionAsync(id, ct);
 
         var order = await Required(id, ct);
 
         if (order.Status is OrderStatus.Shipped or OrderStatus.Delivered)
         {
-            if (order.Carrier != command.Carrier?.Trim() || order.TrackingNumber != command.TrackingNumber?.Trim())
+            if (order.Carrier != request.Carrier?.Trim() || order.TrackingNumber != request.TrackingNumber?.Trim())
             {
                 throw new ServiceException(409, "Order was already shipped with different tracking details.");
 
@@ -317,9 +320,9 @@ public sealed class OrderService(
 
         else
         {
-            order.Ship(command.Carrier, command.TrackingNumber);
+            order.Ship(request.Carrier, request.TrackingNumber);
 
-            await store.SaveAsync(ct);
+            await SaveChangesAsync(ct);
 
         }
 
@@ -330,7 +333,7 @@ public sealed class OrderService(
 
     public async Task<OrderResponse> RecoverAsync(Guid id, DateTime expiryCutoff, CancellationToken ct)
     {
-        await using (var tx = await store.BeginAsync(id, ct))
+        await using (var tx = await BeginTransactionAsync(id, ct))
         {
             var order = await Required(id, ct);
 
@@ -344,7 +347,7 @@ public sealed class OrderService(
             {
                 order.RecordRecoveryAttempt();
 
-                await store.SaveAsync(ct);
+                await SaveChangesAsync(ct);
 
             }
 
@@ -357,7 +360,7 @@ public sealed class OrderService(
 
     public async Task<OrderResponse> DeliverAsync(Guid id, CancellationToken ct)
     {
-        await using var tx = await store.BeginAsync(id, ct);
+        await using var tx = await BeginTransactionAsync(id, ct);
 
         var order = await Required(id, ct);
 
@@ -365,7 +368,7 @@ public sealed class OrderService(
         {
             order.Deliver();
 
-            await store.SaveAsync(ct);
+            await SaveChangesAsync(ct);
 
         }
 
@@ -376,10 +379,104 @@ public sealed class OrderService(
 
     private async Task<PurchaseOrder> Required(
         Guid id,
-        CancellationToken ct) => await store.FindAsync(
+        CancellationToken ct) => await FindAsync(
         id,
         ct) ?? throw new ServiceException(
         404,
         "Order not found.");
 
+    protected virtual async Task<ITransaction> BeginTransactionAsync(Guid id, CancellationToken ct)
+    {
+        if (id == Guid.Empty)
+        {
+            throw new DomainException("Order ID cannot be empty.");
+
+        }
+
+        db.ChangeTracker.Clear();
+
+        var tx = await db.Database.BeginTransactionAsync(ct);
+
+        try
+        {
+            var key = "order:" + id;
+
+            await db.Database.ExecuteSqlInterpolatedAsync(
+                $"SELECT pg_advisory_xact_lock(hashtextextended({key}, 0))",
+                ct);
+
+            return new Transaction(tx);
+        }
+
+        catch
+        {
+            await tx.DisposeAsync();
+
+            throw;
+
+        }
+
+    }
+
+    protected virtual Task<PurchaseOrder?> FindAsync(
+        Guid id,
+        CancellationToken ct) => db.Orders.Include(
+        x => x.Items).SingleOrDefaultAsync(
+        x => x.Id == id,
+        ct);
+
+    protected virtual async Task<PagedResult<OrderResponse>> ReadListAsync(
+        int page,
+        int size,
+        Guid? customerId,
+        OrderStatus? status,
+        CancellationToken ct)
+    {
+        var query = db.Orders.AsNoTracking();
+
+        if (customerId.HasValue)
+        {
+            query = query.Where(x => x.CustomerId == customerId.Value);
+
+        }
+
+        if (status.HasValue)
+        {
+            query = query.Where(x => x.Status == status.Value);
+
+        }
+
+        var count = await query.CountAsync(ct);
+
+        var rows = await query.Include(
+            x => x.Items).OrderByDescending(
+            x => x.CreatedAt).ThenBy(
+            x => x.Id).Skip(
+            (page - 1) * size).Take(size).ToListAsync(ct);
+
+        return new(rows.Select(OrderResponse.From).ToArray(), count, page, size);
+    }
+
+    protected virtual void Add(PurchaseOrder order) => db.Orders.Add(order);
+
+    protected virtual async Task<IReadOnlyList<Guid>> ReadRecoveryIdsAsync(
+        DateTime cutoff,
+        int limit,
+        CancellationToken ct) => await db.Orders.AsNoTracking().Where(
+        x => x.Status == OrderStatus.PendingInventory || x.Status == OrderStatus.Confirming || x.Status == OrderStatus.Cancelling || (x.Status == OrderStatus.Reserved && x.CreatedAt <= cutoff)).OrderBy(
+        x => x.LastRecoveryAttemptAt ?? x.CreatedAt).ThenBy(
+        x => x.Id).Take(limit).Select(
+        x => x.Id).ToListAsync(ct);
+
+    protected virtual async Task SaveChangesAsync(CancellationToken ct) => await db.SaveChangesAsync(ct);
+
+    private sealed class Transaction(IDbContextTransaction tx) : ITransaction
+    {
+        public Task CommitAsync(CancellationToken ct) => tx.CommitAsync(ct);
+
+        public ValueTask DisposeAsync() => tx.DisposeAsync();
+
+    }
+
+    public Task<IReadOnlyList<Guid>> GetRecoveryIdsAsync(DateTime cutoff, int limit, CancellationToken ct) => ReadRecoveryIdsAsync(cutoff, limit, ct);
 }

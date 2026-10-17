@@ -1,22 +1,25 @@
+using ECommerce.Payment.Application;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Storage;
 using ECommerce.Payment.Domain;
 
-namespace ECommerce.Payment.Application;
+namespace ECommerce.Payment.Infrastructure;
 
-public sealed class PaymentService(IPaymentStore store, IOrderClient orders, IPaymentProvider provider)
+public class PaymentService(PaymentDbContext db, IOrderClient orders, IPaymentProvider provider) : IPaymentService
 {
-    public async Task<PaymentResponse> PayAsync(Guid customer, PayCommand command, CancellationToken ct)
+    public async Task<PaymentResponse> PayAsync(Guid customer, PayRequest request, CancellationToken ct)
     {
-        if (command.RequestId == Guid.Empty || command.OrderId == Guid.Empty)
+        if (request.RequestId == Guid.Empty || request.OrderId == Guid.Empty)
         {
             throw new ServiceException(400, "Request ID and order ID are required.");
 
         }
 
-        var previous = await store.FindAsync(command.RequestId, ct);
+        var previous = await FindAsync(request.RequestId, ct);
 
         if (previous is not null)
         {
-            if (previous.CustomerId != customer || previous.OrderId != command.OrderId || previous.MethodToken != command.MethodToken)
+            if (previous.CustomerId != customer || previous.OrderId != request.OrderId || previous.MethodToken != request.MethodToken)
             {
                 throw new ServiceException(409, "Payment request ID was used for different content.");
 
@@ -25,7 +28,7 @@ public sealed class PaymentService(IPaymentStore store, IOrderClient orders, IPa
             return await ProcessAsync(previous.Id, ct);
         }
 
-        var order = await orders.GetAsync(command.OrderId, ct);
+        var order = await orders.GetAsync(request.OrderId, ct);
 
         if (order.CustomerId != customer)
         {
@@ -40,20 +43,20 @@ public sealed class PaymentService(IPaymentStore store, IOrderClient orders, IPa
         }
 
         var payment = PaymentRecord.Create(
-            command.RequestId,
+            request.RequestId,
             order.Id,
             customer,
             order.Total,
             order.Currency,
-            command.MethodToken);
+            request.MethodToken);
 
-        await using (var tx = await store.BeginAsync(order.Id, ct))
+        await using (var tx = await BeginTransactionAsync(order.Id, ct))
         {
-            previous = await store.FindAsync(command.RequestId, ct);
+            previous = await FindAsync(request.RequestId, ct);
 
             if (previous is not null)
             {
-                if (previous.CustomerId != customer || previous.OrderId != command.OrderId || previous.MethodToken != command.MethodToken)
+                if (previous.CustomerId != customer || previous.OrderId != request.OrderId || previous.MethodToken != request.MethodToken)
                 {
                     throw new ServiceException(409, "Payment request ID was used for different content.");
 
@@ -63,7 +66,7 @@ public sealed class PaymentService(IPaymentStore store, IOrderClient orders, IPa
 
             else
             {
-                if (await store.FindActiveByOrderAsync(order.Id, ct)is not null)
+                if (await FindActiveByOrderAsync(order.Id, ct)is not null)
                 {
                     throw new ServiceException(
                         409,
@@ -71,9 +74,9 @@ public sealed class PaymentService(IPaymentStore store, IOrderClient orders, IPa
 
                 }
 
-                store.Add(payment);
+                Add(payment);
 
-                await store.SaveAsync(ct);
+                await SaveChangesAsync(ct);
 
             }
 
@@ -81,7 +84,7 @@ public sealed class PaymentService(IPaymentStore store, IOrderClient orders, IPa
 
         }
 
-        return await ProcessAsync(command.RequestId, ct);
+        return await ProcessAsync(request.RequestId, ct);
     }
 
     public async Task<PaymentResponse> GetAsync(Guid id, Guid customer, bool admin, CancellationToken ct)
@@ -105,14 +108,14 @@ public sealed class PaymentService(IPaymentStore store, IOrderClient orders, IPa
 
         }
 
-        return store.ListAsync(customer, page, size, ct);
+        return ReadListAsync(customer, page, size, ct);
     }
 
     public async Task<PaymentResponse> ProcessAsync(Guid id, CancellationToken ct)
     {
         var known = await Required(id, ct);
 
-        await using (var tx = await store.BeginAsync(known.OrderId, ct))
+        await using (var tx = await BeginTransactionAsync(known.OrderId, ct))
         {
             var payment = await Required(id, ct);
 
@@ -124,7 +127,7 @@ public sealed class PaymentService(IPaymentStore store, IOrderClient orders, IPa
                 {
                     payment.Fail("Order was cancelled before payment.");
 
-                    await store.SaveAsync(ct);
+                    await SaveChangesAsync(ct);
 
                 }
 
@@ -155,7 +158,7 @@ public sealed class PaymentService(IPaymentStore store, IOrderClient orders, IPa
 
                     }
 
-                    await store.SaveAsync(ct);
+                    await SaveChangesAsync(ct);
 
                 }
 
@@ -194,9 +197,9 @@ public sealed class PaymentService(IPaymentStore store, IOrderClient orders, IPa
 
     public async Task<RefundSnapshot> RefundOrderAsync(Guid orderId, CancellationToken ct)
     {
-        await using (var tx = await store.BeginAsync(orderId, ct))
+        await using (var tx = await BeginTransactionAsync(orderId, ct))
         {
-            var payment = await store.FindActiveByOrderAsync(
+            var payment = await FindActiveByOrderAsync(
                 orderId,
                 ct) ?? throw new ServiceException(
                 404,
@@ -212,7 +215,7 @@ public sealed class PaymentService(IPaymentStore store, IOrderClient orders, IPa
             {
                 payment.BeginRefund();
 
-                await store.SaveAsync(ct);
+                await SaveChangesAsync(ct);
 
             }
 
@@ -220,9 +223,9 @@ public sealed class PaymentService(IPaymentStore store, IOrderClient orders, IPa
 
         }
 
-        await using (var tx = await store.BeginAsync(orderId, ct))
+        await using (var tx = await BeginTransactionAsync(orderId, ct))
         {
-            var payment = await store.FindActiveByOrderAsync(
+            var payment = await FindActiveByOrderAsync(
                 orderId,
                 ct) ?? throw new ServiceException(
                 404,
@@ -239,7 +242,7 @@ public sealed class PaymentService(IPaymentStore store, IOrderClient orders, IPa
 
                 payment.Refund();
 
-                await store.SaveAsync(ct);
+                await SaveChangesAsync(ct);
 
             }
 
@@ -254,13 +257,13 @@ public sealed class PaymentService(IPaymentStore store, IOrderClient orders, IPa
     {
         var known = await Required(id, ct);
 
-        await using (var tx = await store.BeginAsync(known.OrderId, ct))
+        await using (var tx = await BeginTransactionAsync(known.OrderId, ct))
         {
             var current = await Required(id, ct);
 
             current.RecordRecoveryAttempt();
 
-            await store.SaveAsync(ct);
+            await SaveChangesAsync(ct);
 
             await tx.CommitAsync(ct);
 
@@ -306,7 +309,7 @@ public sealed class PaymentService(IPaymentStore store, IOrderClient orders, IPa
 
         }
 
-        await using var tx = await store.BeginAsync(payment.OrderId, ct);
+        await using var tx = await BeginTransactionAsync(payment.OrderId, ct);
 
         var current = await Required(id, ct);
 
@@ -314,7 +317,7 @@ public sealed class PaymentService(IPaymentStore store, IOrderClient orders, IPa
         {
             current.MarkNotified();
 
-            await store.SaveAsync(ct);
+            await SaveChangesAsync(ct);
 
         }
 
@@ -324,10 +327,89 @@ public sealed class PaymentService(IPaymentStore store, IOrderClient orders, IPa
 
     private async Task<PaymentRecord> Required(
         Guid id,
-        CancellationToken ct) => await store.FindAsync(
+        CancellationToken ct) => await FindAsync(
         id,
         ct) ?? throw new ServiceException(
         404,
         "Payment not found.");
 
+    protected virtual async Task<IPaymentTransaction> BeginTransactionAsync(Guid id, CancellationToken ct)
+    {
+        db.ChangeTracker.Clear();
+
+        var tx = await db.Database.BeginTransactionAsync(ct);
+
+        try
+        {
+            var key = "payment:" + id;
+
+            await db.Database.ExecuteSqlInterpolatedAsync(
+                $"SELECT pg_advisory_xact_lock(hashtextextended({key}, 0))",
+                ct);
+
+            return new Transaction(tx);
+        }
+
+        catch
+        {
+            await tx.DisposeAsync();
+
+            throw;
+
+        }
+
+    }
+
+    protected virtual Task<PaymentRecord?> FindAsync(
+        Guid id,
+        CancellationToken ct) => db.Payments.SingleOrDefaultAsync(
+        x => x.Id == id,
+        ct);
+
+    protected virtual Task<PaymentRecord?> FindActiveByOrderAsync(
+        Guid id,
+        CancellationToken ct) => db.Payments.SingleOrDefaultAsync(
+        x => x.OrderId == id && x.Status != PaymentStatus.Failed,
+        ct);
+
+    protected virtual async Task<IReadOnlyList<Guid>> ReadRecoveryIdsAsync(
+        int limit,
+        CancellationToken ct) => await db.Payments.AsNoTracking().Where(
+        x => x.Status == PaymentStatus.Pending || x.Status == PaymentStatus.Refunding || (x.Status == PaymentStatus.Succeeded && !x.OrderNotified)).OrderBy(
+        x => x.LastRecoveryAttemptAt ?? x.CreatedAt).Take(limit).Select(
+        x => x.Id).ToListAsync(ct);
+
+    protected virtual async Task<PagedResult<PaymentResponse>> ReadListAsync(Guid? customer, int page, int size, CancellationToken ct)
+    {
+        var query = db.Payments.AsNoTracking();
+
+        if (customer.HasValue)
+        {
+            query = query.Where(x => x.CustomerId == customer.Value);
+
+        }
+
+        var count = await query.CountAsync(ct);
+
+        var items = await query.OrderByDescending(
+            x => x.CreatedAt).ThenBy(
+            x => x.Id).Skip(
+            (page - 1) * size).Take(size).ToListAsync(ct);
+
+        return new(items.Select(PaymentResponse.From).ToArray(), count, page, size);
+    }
+
+    protected virtual void Add(PaymentRecord payment) => db.Payments.Add(payment);
+
+    protected virtual async Task SaveChangesAsync(CancellationToken ct) => await db.SaveChangesAsync(ct);
+
+    private sealed class Transaction(IDbContextTransaction tx) : IPaymentTransaction
+    {
+        public Task CommitAsync(CancellationToken ct) => tx.CommitAsync(ct);
+
+        public ValueTask DisposeAsync() => tx.DisposeAsync();
+
+    }
+
+    public Task<IReadOnlyList<Guid>> GetRecoveryIdsAsync(int limit, CancellationToken ct) => ReadRecoveryIdsAsync(limit, ct);
 }

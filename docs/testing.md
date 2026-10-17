@@ -11,7 +11,7 @@ API gateway, and their shared authentication. No running APIs, local security
 files, message broker, or payment account are needed for the default suite.
 Tests generate temporary RSA signing keys and service credentials inside the test
 process. Parallel execution is disabled because these credentials use process
-environment variables and application tests share transactional test stores.
+environment variables and application tests share transactional test service state.
 
 | Area | Coverage |
 | --- | --- |
@@ -25,8 +25,9 @@ environment variables and application tests share transactional test stores.
 | Integration | Cart checkout through real HTTP clients to Order and Inventory, Payment callbacks to Order, shipment/delivery and decline/cancellation |
 | Persistence | PostgreSQL model/migration consistency and script generation for all six databases; optional live tests described below |
 
-Application tests use the production services with transactional repository doubles.
-The doubles copy state at transaction entry and publish it on commit, so tests can
+Application tests subclass the production services and override protected persistence
+methods with transactional in-memory state. The test implementations copy state at
+transaction entry and publish it on commit, so tests can
 assert rollback behavior. They do not prove PostgreSQL locking behavior. API tests
 use `WebApplicationFactory` and the production authentication, controllers, serializers,
 and exception handlers. Identity HTTP policy tests substitute an explicit stub;

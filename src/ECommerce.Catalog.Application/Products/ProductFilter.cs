@@ -1,8 +1,8 @@
 using ECommerce.Catalog.Domain.Exceptions;
 
-namespace ECommerce.Catalog.Application.Products.Queries.GetProducts;
+namespace ECommerce.Catalog.Application.Products;
 
-public sealed record GetProductsQuery
+public sealed record ProductFilter
 {
     public int PageNumber { get; init; } = 1;
 

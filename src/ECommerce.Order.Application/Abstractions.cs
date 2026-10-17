@@ -8,30 +8,6 @@ public interface ITransaction : IAsyncDisposable
 
 }
 
-public interface IOrderStore
-{
-    Task<ITransaction> BeginAsync(Guid id, CancellationToken cancellationToken);
-
-    Task<PurchaseOrder?> FindAsync(Guid id, CancellationToken cancellationToken);
-
-    Task<PagedResult<OrderResponse>> ListAsync(
-        int page,
-        int size,
-        Guid? customerId,
-        OrderStatus? status,
-        CancellationToken cancellationToken);
-
-    Task<IReadOnlyList<Guid>> GetRecoveryIdsAsync(
-        DateTime expiryCutoff,
-        int limit,
-        CancellationToken cancellationToken);
-
-    void Add(PurchaseOrder order);
-
-    Task SaveAsync(CancellationToken cancellationToken);
-
-}
-
 public interface ICatalogClient
 {
     Task<CatalogProduct> GetAsync(Guid productId, CancellationToken cancellationToken);

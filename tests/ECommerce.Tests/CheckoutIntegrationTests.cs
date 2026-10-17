@@ -42,26 +42,26 @@ public sealed class CheckoutIntegrationTests
 
         orders = new(services =>
         {
-            services.RemoveAll<Ord.OrderService>();
+            services.RemoveAll<Ord.IOrderService>();
 
-            services.AddSingleton(
-                new Ord.OrderService(
-                    world.OrderStore,
+            services.AddSingleton<Ord.IOrderService>(
+                new OrderTestService(
                     world.Catalog,
                     new ECommerce.Order.Infrastructure.InventoryClient(inventoryHttp),
-                    new ECommerce.Order.Infrastructure.PaymentClient(refundsHttp)));
+                    new ECommerce.Order.Infrastructure.PaymentClient(refundsHttp),
+                    world.OrderStore.State));
 
         });
 
         payments = new(services =>
         {
-            services.RemoveAll<Pay.PaymentService>();
+            services.RemoveAll<Pay.IPaymentService>();
 
-            services.AddSingleton(
-                new Pay.PaymentService(
-                    world.PaymentStore,
+            services.AddSingleton<Pay.IPaymentService>(
+                new PaymentTestService(
                     new ECommerce.Payment.Infrastructure.OrderClient(paymentOrdersHttp),
-                    world.Provider));
+                    world.Provider,
+                    world.PaymentStore.State));
 
         });
 
@@ -71,13 +71,13 @@ public sealed class CheckoutIntegrationTests
 
         await using var cart = new ApiFactory<ECommerce.Cart.Api.Program>(services =>
         {
-            services.RemoveAll<Car.CartService>();
+            services.RemoveAll<Car.ICartService>();
 
-            services.AddSingleton(
-                new Car.CartService(
-                    world.CartStore,
+            services.AddSingleton<Car.ICartService>(
+                new CartTestService(
                     world.Catalog,
-                    new ECommerce.Cart.Infrastructure.OrderClient(cartOrdersHttp)));
+                    new ECommerce.Cart.Infrastructure.OrderClient(cartOrdersHttp),
+                    world.CartStore.State));
 
         });
 
@@ -91,7 +91,7 @@ public sealed class CheckoutIntegrationTests
             HttpStatusCode.NoContent,
             (await cartClient.PutAsJsonAsync($"/api/cart/items/{product}", new { quantity = 2 })).StatusCode);
 
-        var checkout = new Car.CheckoutCommand(Guid.NewGuid(), CommerceWorld.CartAddress());
+        var checkout = new Car.CheckoutRequest(Guid.NewGuid(), CommerceWorld.CartAddress());
 
         var checkoutResponse = await cartClient.PostAsJsonAsync("/api/cart/checkout", checkout);
 
@@ -105,7 +105,7 @@ public sealed class CheckoutIntegrationTests
 
         Assert.Empty((await cartClient.GetFromJsonAsync<Car.CartResponse>("/api/cart"))!.Items);
 
-        var pay = new Pay.PayCommand(Guid.NewGuid(), snapshot.Id, method);
+        var pay = new Pay.PayRequest(Guid.NewGuid(), snapshot.Id, method);
 
         Assert.Equal(expected, (await paymentClient.PostAsJsonAsync("/api/payments", pay)).StatusCode);
 

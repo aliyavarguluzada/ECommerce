@@ -10,6 +10,14 @@ For a separate dataset with 100,000 users and 100,000 orders, see
 
 ## Architecture
 
+Each API uses a service interface (`ICatalogService`, `IInventoryService`,
+`IOrderService`, `IIdentityService`, `ICartService`, or `IPaymentService`).
+Application projects define the interfaces and request/response contracts.
+Infrastructure projects contain the implementing service classes, which perform
+reads and writes directly through their EF Core DbContexts and coordinate HTTP
+clients where needed. Business rules remain in the domain entities. There are
+no repository, unit-of-work, or CQRS handler layers.
+
 Diagram exported from [GitDiagram](https://gitdiagram.com/aliyavarguluzada/ecommerce).
 Edit the Mermaid block below to keep this overview up to date manually.
 
@@ -47,7 +55,7 @@ end
 subgraph group_catalog["Catalog management"]
   node_product_api["Product API"]
   node_category_api["Category API"]
-  node_catalog_handlers["Catalog handlers"]
+  node_catalog_service["Catalog service<br/>[CatalogService.cs]"]
   node_catalog_domain["Product and category rules<br/>[Product.cs]"]
   node_catalog_store[("Catalog persistence")]
 end
@@ -96,10 +104,10 @@ node_gateway -->|"routes requests"| node_payment_api
 node_identity_api -->|"delegates identity"| node_identity_service
 node_identity_service -->|"reads and writes"| node_identity_db
 node_security -->|"secures endpoints"| node_identity_api
-node_product_api -->|"dispatches requests"| node_catalog_handlers
-node_category_api -->|"dispatches requests"| node_catalog_handlers
-node_catalog_handlers -.->|"applies rules"| node_catalog_domain
-node_catalog_handlers -.->|"persists catalog"| node_catalog_store
+node_product_api -->|"dispatches requests"| node_catalog_service
+node_category_api -->|"dispatches requests"| node_catalog_service
+node_catalog_service -.->|"applies rules"| node_catalog_domain
+node_catalog_service -.->|"persists catalog"| node_catalog_store
 node_cart_api -->|"calls service"| node_cart_service
 node_cart_service -->|"updates cart state"| node_cart_domain
 node_cart_service -.->|"stores cart state"| node_cart_db
@@ -131,23 +139,23 @@ click node_identity_db "https://github.com/aliyavarguluzada/ecommerce/blob/maste
 click node_security "https://github.com/aliyavarguluzada/ecommerce/blob/master/src/ECommerce.Security/SecurityExtensions.cs"
 click node_product_api "https://github.com/aliyavarguluzada/ecommerce/blob/master/src/ECommerce.Catalog.Api/Products/ProductController.cs"
 click node_category_api "https://github.com/aliyavarguluzada/ecommerce/blob/master/src/ECommerce.Catalog.Api/Categories/CategoryController.cs"
-click node_catalog_handlers "https://github.com/aliyavarguluzada/ecommerce/tree/master/src/ECommerce.Catalog.Application"
+click node_catalog_service "https://github.com/aliyavarguluzada/ecommerce/blob/master/src/ECommerce.Catalog.Infrastructure/CatalogService.cs"
 click node_catalog_domain "https://github.com/aliyavarguluzada/ecommerce/blob/master/src/ECommerce.Catalog.Domain/Aggregates/Products/Product.cs"
 click node_catalog_store "https://github.com/aliyavarguluzada/ecommerce/blob/master/src/ECommerce.Catalog.Infrastructure/Persistence/CatalogDbContext.cs"
 click node_cart_api "https://github.com/aliyavarguluzada/ecommerce/blob/master/src/ECommerce.Cart.Api/Controllers/CartController.cs"
-click node_cart_service "https://github.com/aliyavarguluzada/ecommerce/blob/master/src/ECommerce.Cart.Application/CartService.cs"
+click node_cart_service "https://github.com/aliyavarguluzada/ecommerce/blob/master/src/ECommerce.Cart.Infrastructure/CartService.cs"
 click node_cart_domain "https://github.com/aliyavarguluzada/ecommerce/blob/master/src/ECommerce.Cart.Domain/ShoppingCart.cs"
 click node_cart_db "https://github.com/aliyavarguluzada/ecommerce/blob/master/src/ECommerce.Cart.Infrastructure/CartDbContext.cs"
 click node_order_api "https://github.com/aliyavarguluzada/ecommerce/blob/master/src/ECommerce.Order.Api/Controllers/OrdersController.cs"
-click node_order_service "https://github.com/aliyavarguluzada/ecommerce/blob/master/src/ECommerce.Order.Application/OrderService.cs"
+click node_order_service "https://github.com/aliyavarguluzada/ecommerce/blob/master/src/ECommerce.Order.Infrastructure/OrderService.cs"
 click node_order_domain "https://github.com/aliyavarguluzada/ecommerce/blob/master/src/ECommerce.Order.Domain/PurchaseOrder.cs"
 click node_order_db "https://github.com/aliyavarguluzada/ecommerce/blob/master/src/ECommerce.Order.Infrastructure/OrderDbContext.cs"
 click node_order_recovery "https://github.com/aliyavarguluzada/ecommerce/blob/master/src/ECommerce.Order.Api/Common/OrderRecoveryWorker.cs"
 click node_inventory_api "https://github.com/aliyavarguluzada/ecommerce/blob/master/src/ECommerce.Inventory.Api/Controllers/ReservationsController.cs"
-click node_inventory_service "https://github.com/aliyavarguluzada/ecommerce/blob/master/src/ECommerce.Inventory.Application/InventoryService.cs"
+click node_inventory_service "https://github.com/aliyavarguluzada/ecommerce/blob/master/src/ECommerce.Inventory.Infrastructure/InventoryService.cs"
 click node_inventory_db "https://github.com/aliyavarguluzada/ecommerce/blob/master/src/ECommerce.Inventory.Infrastructure/InventoryDbContext.cs"
 click node_payment_api "https://github.com/aliyavarguluzada/ecommerce/blob/master/src/ECommerce.Payment.Api/Controllers/PaymentsController.cs"
-click node_payment_service "https://github.com/aliyavarguluzada/ecommerce/blob/master/src/ECommerce.Payment.Application/PaymentService.cs"
+click node_payment_service "https://github.com/aliyavarguluzada/ecommerce/blob/master/src/ECommerce.Payment.Infrastructure/PaymentService.cs"
 click node_payment_db "https://github.com/aliyavarguluzada/ecommerce/blob/master/src/ECommerce.Payment.Infrastructure/PaymentDbContext.cs"
 click node_provider "https://github.com/aliyavarguluzada/ecommerce/blob/master/src/ECommerce.Payment.Infrastructure/DevelopmentPaymentProvider.cs"
 click node_payment_recovery "https://github.com/aliyavarguluzada/ecommerce/blob/master/src/ECommerce.Payment.Api/Common/PaymentRecoveryWorker.cs"
@@ -160,7 +168,7 @@ classDef toneRose fill:#ffe4e6,stroke:#e11d48,stroke-width:1.5px,color:#881337
 classDef toneIndigo fill:#e0e7ff,stroke:#4f46e5,stroke-width:1.5px,color:#312e81
 classDef toneTeal fill:#ccfbf1,stroke:#0f766e,stroke-width:1.5px,color:#134e4a
 class node_gateway,node_storefront,node_identity_api,node_identity_service,node_identity_db,node_security toneBlue
-class node_product_api,node_category_api,node_catalog_handlers,node_catalog_domain,node_catalog_store toneAmber
+class node_product_api,node_category_api,node_catalog_service,node_catalog_domain,node_catalog_store toneAmber
 class node_cart_api,node_cart_service,node_cart_domain,node_cart_db,node_order_api,node_order_service,node_order_domain,node_order_db,node_order_recovery toneMint
 class node_inventory_api,node_inventory_service,node_inventory_db toneRose
 class node_payment_api,node_payment_service,node_payment_db,node_provider,node_payment_recovery,node_customer,node_admin toneIndigo
@@ -197,8 +205,8 @@ Catalog now implements category CRUD and product creation, retrieval, updating,
 price changes, discontinuation, pagination, and filtering using four layers:
 
 - Domain owns the Product and Category aggregates, Money, invariants, and domain events.
-- Application owns commands, queries, handlers, DTOs, and persistence contracts.
-- Infrastructure owns EF Core, PostgreSQL mappings, repositories, queries, and migrations.
+- Application owns service interfaces and request/response DTOs.
+- Infrastructure owns service implementations, direct EF Core reads/writes, PostgreSQL mappings, and migrations.
 - API owns HTTP routing, dependency injection, ProblemDetails, OpenAPI, and health endpoints.
 
 Product and Category are independent aggregates; products reference categories by ID.

@@ -77,8 +77,8 @@ public sealed class PostgresTests
         {
             await db.Database.MigrateAsync();
 
-            await new ECommerce.Inventory.Application.InventoryService(
-                new Inv.InventoryStore(db),
+            await new ECommerce.Inventory.Infrastructure.InventoryService(
+                db,
                 world.Catalog).CreateAsync(
                 new(product, 5),
                 default);
@@ -91,8 +91,8 @@ public sealed class PostgresTests
 
             try
             {
-                await new ECommerce.Inventory.Application.InventoryService(
-                    new Inv.InventoryStore(db),
+                await new ECommerce.Inventory.Infrastructure.InventoryService(
+                    db,
                     world.Catalog).ReserveAsync(
                     new(order, [new(product, 4)]),
                     default);
@@ -121,8 +121,8 @@ public sealed class PostgresTests
 
         Assert.Equal(1, await verify.Reservations.CountAsync());
 
-        var service = new ECommerce.Inventory.Application.InventoryService(
-            new Inv.InventoryStore(verify),
+        var service = new ECommerce.Inventory.Infrastructure.InventoryService(
+            verify,
             world.Catalog);
 
         var reservation = await verify.Reservations.SingleAsync();
@@ -149,8 +149,8 @@ public sealed class PostgresTests
         {
             await db.Database.MigrateAsync();
 
-            var service = new ECommerce.Order.Application.OrderService(
-                new Ord.OrderStore(db),
+            var service = new ECommerce.Order.Infrastructure.OrderService(
+                db,
                 world.Catalog,
                 world.InventoryClient,
                 new RefundAdapter { Payment = world.Payment });
@@ -161,8 +161,8 @@ public sealed class PostgresTests
 
         await using var restarted = new Ord.OrderDbContext(database.Options<Ord.OrderDbContext>());
 
-        var fresh = new ECommerce.Order.Application.OrderService(
-            new Ord.OrderStore(restarted),
+        var fresh = new ECommerce.Order.Infrastructure.OrderService(
+            restarted,
             world.Catalog,
             world.InventoryClient,
             new RefundAdapter { Payment = world.Payment });
@@ -195,14 +195,14 @@ public sealed class PostgresTests
 
         var customer = TestCredentials.Customer;
 
-        var checkout = new ECommerce.Cart.Application.CheckoutCommand(Guid.NewGuid(), CommerceWorld.CartAddress());
+        var checkout = new ECommerce.Cart.Application.CheckoutRequest(Guid.NewGuid(), CommerceWorld.CartAddress());
 
         await using (var db = new Car.CartDbContext(database.Options<Car.CartDbContext>()))
         {
             await db.Database.MigrateAsync();
 
-            var service = new ECommerce.Cart.Application.CartService(
-                new Car.CartStore(db),
+            var service = new ECommerce.Cart.Infrastructure.CartService(
+                db,
                 world.Catalog,
                 world.CartOrderClient);
 
@@ -214,8 +214,8 @@ public sealed class PostgresTests
 
         await using var restarted = new Car.CartDbContext(database.Options<Car.CartDbContext>());
 
-        var fresh = new ECommerce.Cart.Application.CartService(
-            new Car.CartStore(restarted),
+        var fresh = new ECommerce.Cart.Infrastructure.CartService(
+            restarted,
             world.Catalog,
             world.CartOrderClient);
 
@@ -245,14 +245,14 @@ public sealed class PostgresTests
 
         var order = await world.Order.CreateAsync(world.NewOrder(product), default);
 
-        var command = new ECommerce.Payment.Application.PayCommand(Guid.NewGuid(), order.Id, "dev-approved");
+        var command = new ECommerce.Payment.Application.PayRequest(Guid.NewGuid(), order.Id, "dev-approved");
 
         await using (var db = new Pay.PaymentDbContext(database.Options<Pay.PaymentDbContext>()))
         {
             await db.Database.MigrateAsync();
 
-            await new ECommerce.Payment.Application.PaymentService(
-                new Pay.PaymentStore(db),
+            await new ECommerce.Payment.Infrastructure.PaymentService(
+                db,
                 world.PaymentOrderClient,
                 world.Provider).PayAsync(
                 TestCredentials.Customer,
@@ -263,8 +263,8 @@ public sealed class PostgresTests
 
         await using var restarted = new Pay.PaymentDbContext(database.Options<Pay.PaymentDbContext>());
 
-        var fresh = new ECommerce.Payment.Application.PaymentService(
-            new Pay.PaymentStore(restarted),
+        var fresh = new ECommerce.Payment.Infrastructure.PaymentService(
+            restarted,
             world.PaymentOrderClient,
             world.Provider);
 

@@ -11,7 +11,7 @@ namespace ECommerce.Inventory.Api.Controllers;
 
 [Route("api/inventory/reservations")]
 
-public sealed class ReservationsController(InventoryService service) : ControllerBase
+public sealed class ReservationsController(IInventoryService service) : ControllerBase
 {
     [HttpGet]
 
@@ -32,7 +32,7 @@ public sealed class ReservationsController(InventoryService service) : Controlle
     [HttpPost]
 
     public async Task<ActionResult<ReservationResponse>> Reserve(
-        ReserveStockCommand command,
+        ReserveStockRequest command,
         CancellationToken ct) => Ok(
         await service.ReserveAsync(command, ct));
 

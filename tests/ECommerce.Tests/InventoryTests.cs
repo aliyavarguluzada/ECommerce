@@ -46,7 +46,7 @@ public sealed class InventoryTests
 
         var order = Guid.NewGuid();
 
-        var request = new ReserveStockCommand(order, [new(id, 3)]);
+        var request = new ReserveStockRequest(order, [new(id, 3)]);
 
         await world.Inventory.ReserveAsync(request, default);
 

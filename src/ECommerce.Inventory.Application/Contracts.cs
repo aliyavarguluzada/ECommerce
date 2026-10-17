@@ -3,11 +3,11 @@ using ECommerce.Inventory.Domain;
 
 namespace ECommerce.Inventory.Application;
 
-public sealed record CreateStockCommand([property: JsonRequired] Guid ProductId, [property: JsonRequired] int Quantity);
+public sealed record CreateStockRequest([property: JsonRequired] Guid ProductId, [property: JsonRequired] int Quantity);
 
-public sealed record AdjustStockCommand(Guid RequestId, [property: JsonRequired] int Delta, string Reason);
+public sealed record AdjustStockRequest(Guid RequestId, [property: JsonRequired] int Delta, string Reason);
 
-public sealed record ReserveStockCommand(Guid OrderId, IReadOnlyList<ReserveLineRequest> Items);
+public sealed record ReserveStockRequest(Guid OrderId, IReadOnlyList<ReserveLineRequest> Items);
 
 public sealed record ReserveLineRequest(Guid ProductId, int Quantity);
 

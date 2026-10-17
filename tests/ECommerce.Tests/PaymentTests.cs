@@ -17,7 +17,7 @@ public sealed class PaymentTests
 
         var order = await world.Order.CreateAsync(world.NewOrder(product), default);
 
-        var request = new PayCommand(Guid.NewGuid(), order.Id, "dev-approved");
+        var request = new PayRequest(Guid.NewGuid(), order.Id, "dev-approved");
 
         var receipt = await world.Payment.PayAsync(TestCredentials.Customer, request, default);
 
@@ -67,7 +67,7 @@ public sealed class PaymentTests
 
         var order = await world.Order.CreateAsync(world.NewOrder(product), default);
 
-        var request = new PayCommand(Guid.NewGuid(), order.Id, "dev-approved");
+        var request = new PayRequest(Guid.NewGuid(), order.Id, "dev-approved");
 
         await world.Payment.PayAsync(TestCredentials.Customer, request, default);
 
@@ -212,7 +212,7 @@ public sealed class PaymentTests
 
         var order = await world.Order.CreateAsync(world.NewOrder(product), default);
 
-        var request = new PayCommand(Guid.NewGuid(), order.Id, "dev-approved");
+        var request = new PayRequest(Guid.NewGuid(), order.Id, "dev-approved");
 
         world.Provider.Unavailable = true;
 

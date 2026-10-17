@@ -98,7 +98,7 @@ public sealed class CartTests
 
         await world.Cart.SetAsync(TestCredentials.Customer, product, 2, default);
 
-        var request = new CheckoutCommand(Guid.NewGuid(), CommerceWorld.CartAddress());
+        var request = new CheckoutRequest(Guid.NewGuid(), CommerceWorld.CartAddress());
 
         world.CartOrderClient.LoseNextCreateResponse = true;
 
@@ -134,7 +134,7 @@ public sealed class CartTests
 
         await world.Cart.SetAsync(TestCredentials.Customer, first, 2, default);
 
-        var request = new CheckoutCommand(Guid.NewGuid(), CommerceWorld.CartAddress());
+        var request = new CheckoutRequest(Guid.NewGuid(), CommerceWorld.CartAddress());
 
         await world.Cart.CheckoutAsync(TestCredentials.Customer, request, default);
 
@@ -186,7 +186,7 @@ public sealed class CartTests
 
         await world.Cart.SetAsync(TestCredentials.Customer, product, 1, default);
 
-        var request = new CheckoutCommand(Guid.NewGuid(), CommerceWorld.CartAddress());
+        var request = new CheckoutRequest(Guid.NewGuid(), CommerceWorld.CartAddress());
 
         await world.Cart.CheckoutAsync(TestCredentials.Customer, request, default);
 

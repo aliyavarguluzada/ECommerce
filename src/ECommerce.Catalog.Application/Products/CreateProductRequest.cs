@@ -1,8 +1,8 @@
 using System.Text.Json.Serialization;
 
-namespace ECommerce.Catalog.Application.Products.Commands.CreateProduct;
+namespace ECommerce.Catalog.Application.Products;
 
-public sealed record CreateProductCommand(
+public sealed record CreateProductRequest(
     string Name,
     string? Description,
     [property: JsonRequired] decimal Price,

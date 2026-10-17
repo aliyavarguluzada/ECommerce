@@ -1,6 +1,6 @@
 namespace ECommerce.Cart.Application;
 
-public sealed record SetQuantityCommand(int Quantity);
+public sealed record SetQuantityRequest(int Quantity);
 
 public sealed record AddressRequest(
     string Recipient,
@@ -55,7 +55,7 @@ public sealed record AddressRequest(
 
 }
 
-public sealed record CheckoutCommand(Guid RequestId, AddressRequest ShippingAddress);
+public sealed record CheckoutRequest(Guid RequestId, AddressRequest ShippingAddress);
 
 public sealed record CatalogProduct(Guid Id, string Name, decimal Price, string Currency, bool IsActive);
 
@@ -81,22 +81,6 @@ public sealed record OrderSnapshot(Guid Id, Guid CustomerId, string Status, stri
 public interface ICartTransaction : IAsyncDisposable
 {
     Task CommitAsync(CancellationToken ct);
-
-}
-
-public interface ICartStore
-{
-    Task<ICartTransaction> BeginAsync(Guid customerId, CancellationToken ct);
-
-    Task<Domain.ShoppingCart?> FindAsync(Guid customerId, CancellationToken ct);
-
-    Task<Domain.CheckoutAttempt?> FindCheckoutAsync(Guid requestId, CancellationToken ct);
-
-    void Add(Domain.ShoppingCart cart);
-
-    void Add(Domain.CheckoutAttempt attempt);
-
-    Task SaveAsync(CancellationToken ct);
 
 }
 

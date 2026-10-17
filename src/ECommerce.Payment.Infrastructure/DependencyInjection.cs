@@ -15,9 +15,7 @@ public static class DependencyInjection
     {
         services.AddDbContext<PaymentDbContext>(options => options.UseNpgsql(connection));
 
-        services.AddScoped<IPaymentStore, PaymentStore>();
-
-        services.AddScoped<PaymentService>();
+        services.AddScoped<IPaymentService, PaymentService>();
 
         services.AddSingleton<IPaymentProvider>(new DevelopmentPaymentProvider(developmentProvider));
 

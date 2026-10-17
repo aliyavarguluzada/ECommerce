@@ -1,15 +1,18 @@
+using ECommerce.Cart.Application;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Storage;
 using System.Security.Cryptography;
 using System.Text;
 using System.Text.Json;
 using ECommerce.Cart.Domain;
 
-namespace ECommerce.Cart.Application;
+namespace ECommerce.Cart.Infrastructure;
 
-public sealed class CartService(ICartStore store, ICatalogClient catalog, IOrderClient orders)
+public class CartService(CartDbContext db, ICatalogClient catalog, IOrderClient orders) : ICartService
 {
     public async Task<CartResponse> GetAsync(Guid customer, CancellationToken ct)
     {
-        var cart = await store.FindAsync(customer, ct) ?? ShoppingCart.Create(customer);
+        var cart = await FindAsync(customer, ct) ?? ShoppingCart.Create(customer);
 
         var items = new List<CartItemResponse>();
 
@@ -60,13 +63,13 @@ public sealed class CartService(ICartStore store, ICatalogClient catalog, IOrder
 
         }
 
-        await using var tx = await store.BeginAsync(customer, ct);
+        await using var tx = await BeginTransactionAsync(customer, ct);
 
         var cart = await GetOrCreate(customer, ct);
 
         cart.SetQuantity(productId, quantity);
 
-        await store.SaveAsync(ct);
+        await SaveChangesAsync(ct);
 
         await tx.CommitAsync(ct);
 
@@ -74,13 +77,13 @@ public sealed class CartService(ICartStore store, ICatalogClient catalog, IOrder
 
     public async Task RemoveAsync(Guid customer, Guid productId, CancellationToken ct)
     {
-        await using var tx = await store.BeginAsync(customer, ct);
+        await using var tx = await BeginTransactionAsync(customer, ct);
 
         var cart = await GetOrCreate(customer, ct);
 
         cart.Remove(productId);
 
-        await store.SaveAsync(ct);
+        await SaveChangesAsync(ct);
 
         await tx.CommitAsync(ct);
 
@@ -88,35 +91,35 @@ public sealed class CartService(ICartStore store, ICatalogClient catalog, IOrder
 
     public async Task ClearAsync(Guid customer, CancellationToken ct)
     {
-        await using var tx = await store.BeginAsync(customer, ct);
+        await using var tx = await BeginTransactionAsync(customer, ct);
 
         var cart = await GetOrCreate(customer, ct);
 
         cart.Clear();
 
-        await store.SaveAsync(ct);
+        await SaveChangesAsync(ct);
 
         await tx.CommitAsync(ct);
 
     }
 
-    public async Task<OrderSnapshot> CheckoutAsync(Guid customer, CheckoutCommand command, CancellationToken ct)
+    public async Task<OrderSnapshot> CheckoutAsync(Guid customer, CheckoutRequest request, CancellationToken ct)
     {
-        if (command.RequestId == Guid.Empty || command.ShippingAddress is null)
+        if (request.RequestId == Guid.Empty || request.ShippingAddress is null)
         {
             throw new ServiceException(400, "Checkout request ID and address are required.");
 
         }
 
-        var address = command.ShippingAddress.Normalize();
+        var address = request.ShippingAddress.Normalize();
 
         var json = JsonSerializer.Serialize(address);
 
         var hash = Convert.ToHexString(SHA256.HashData(Encoding.UTF8.GetBytes(json)));
 
-        await using (var tx = await store.BeginAsync(customer, ct))
+        await using (var tx = await BeginTransactionAsync(customer, ct))
         {
-            var existing = await store.FindCheckoutAsync(command.RequestId, ct);
+            var existing = await FindCheckoutAsync(request.RequestId, ct);
 
             if (existing is not null)
             {
@@ -140,13 +143,13 @@ public sealed class CartService(ICartStore store, ICatalogClient catalog, IOrder
             {
                 var cart = await GetOrCreate(customer, ct);
 
-                cart.BeginCheckout(command.RequestId);
+                cart.BeginCheckout(request.RequestId);
 
-                var attempt = CheckoutAttempt.Create(command.RequestId, customer, json, hash, cart.Items);
+                var attempt = CheckoutAttempt.Create(request.RequestId, customer, json, hash, cart.Items);
 
-                store.Add(attempt);
+                Add(attempt);
 
-                await store.SaveAsync(ct);
+                await SaveChangesAsync(ct);
 
                 await tx.CommitAsync(ct);
 
@@ -154,10 +157,10 @@ public sealed class CartService(ICartStore store, ICatalogClient catalog, IOrder
 
         }
 
-        await using var execution = await store.BeginAsync(customer, ct);
+        await using var execution = await BeginTransactionAsync(customer, ct);
 
-        var current = await store.FindCheckoutAsync(
-            command.RequestId,
+        var current = await FindCheckoutAsync(
+            request.RequestId,
             ct) ?? throw new ServiceException(
             409,
             "Checkout no longer exists.");
@@ -170,7 +173,7 @@ public sealed class CartService(ICartStore store, ICatalogClient catalog, IOrder
 
         if (current.Status == CheckoutStatus.Completed)
         {
-            var prior = await orders.GetAsync(command.RequestId, ct);
+            var prior = await orders.GetAsync(request.RequestId, ct);
 
             if (prior.CustomerId != customer)
             {
@@ -187,19 +190,19 @@ public sealed class CartService(ICartStore store, ICatalogClient catalog, IOrder
 
         try
         {
-            order = await orders.CreateAsync(command.RequestId, customer, address, current.Items, ct);
+            order = await orders.CreateAsync(request.RequestId, customer, address, current.Items, ct);
 
         }
 
         catch (ServiceException error)when (error.StatusCode is 400 or 409)
         {
-            var failedCart = await store.FindAsync(customer, ct);
+            var failedCart = await FindAsync(customer, ct);
 
-            failedCart?.AbandonCheckout(command.RequestId);
+            failedCart?.AbandonCheckout(request.RequestId);
 
             current.Fail();
 
-            await store.SaveAsync(ct);
+            await SaveChangesAsync(ct);
 
             await execution.CommitAsync(ct);
 
@@ -207,23 +210,23 @@ public sealed class CartService(ICartStore store, ICatalogClient catalog, IOrder
 
         }
 
-        if (order.CustomerId != customer || order.Id != command.RequestId)
+        if (order.CustomerId != customer || order.Id != request.RequestId)
         {
             throw new ServiceException(503, "Order returned an invalid checkout result.");
 
         }
 
-        var cartToClear = await store.FindAsync(
+        var cartToClear = await FindAsync(
             customer,
             ct) ?? throw new ServiceException(
             409,
             "Cart no longer exists.");
 
-        cartToClear.CompleteCheckout(command.RequestId);
+        cartToClear.CompleteCheckout(request.RequestId);
 
         current.Complete();
 
-        await store.SaveAsync(ct);
+        await SaveChangesAsync(ct);
 
         await execution.CommitAsync(ct);
 
@@ -232,13 +235,13 @@ public sealed class CartService(ICartStore store, ICatalogClient catalog, IOrder
 
     private async Task<ShoppingCart> GetOrCreate(Guid id, CancellationToken ct)
     {
-        var cart = await store.FindAsync(id, ct);
+        var cart = await FindAsync(id, ct);
 
         if (cart is null)
         {
             cart = ShoppingCart.Create(id);
 
-            store.Add(cart);
+            Add(cart);
 
         }
 
@@ -247,11 +250,11 @@ public sealed class CartService(ICartStore store, ICatalogClient catalog, IOrder
 
     public async Task<OrderSnapshot> RetryCheckoutAsync(Guid customer, CancellationToken ct)
     {
-        var cart = await store.FindAsync(customer, ct);
+        var cart = await FindAsync(customer, ct);
 
         var id = cart?.PendingCheckoutId ?? throw new ServiceException(409, "No checkout is pending.");
 
-        var attempt = await store.FindCheckoutAsync(
+        var attempt = await FindCheckoutAsync(
             id,
             ct) ?? throw new ServiceException(
             409,
@@ -269,6 +272,61 @@ public sealed class CartService(ICartStore store, ICatalogClient catalog, IOrder
             "Checkout address is missing.");
 
         return await CheckoutAsync(customer, new(id, address), ct);
+    }
+
+    protected virtual async Task<ICartTransaction> BeginTransactionAsync(Guid id, CancellationToken ct)
+    {
+        db.ChangeTracker.Clear();
+
+        var tx = await db.Database.BeginTransactionAsync(ct);
+
+        try
+        {
+            var key = "cart:" + id;
+
+            await db.Database.ExecuteSqlInterpolatedAsync(
+                $"SELECT pg_advisory_xact_lock(hashtextextended({key}, 0))",
+                ct);
+
+            return new Transaction(tx);
+        }
+
+        catch
+        {
+            await tx.DisposeAsync();
+
+            throw;
+
+        }
+
+    }
+
+    protected virtual Task<ShoppingCart?> FindAsync(
+        Guid id,
+        CancellationToken ct) => db.Carts.Include(
+        x => x.Items).SingleOrDefaultAsync(
+        x => x.CustomerId == id,
+        ct);
+
+    protected virtual Task<CheckoutAttempt?> FindCheckoutAsync(
+        Guid id,
+        CancellationToken ct) => db.Checkouts.Include(
+        x => x.Items).SingleOrDefaultAsync(
+        x => x.RequestId == id,
+        ct);
+
+    protected virtual void Add(ShoppingCart cart) => db.Carts.Add(cart);
+
+    protected virtual void Add(CheckoutAttempt attempt) => db.Checkouts.Add(attempt);
+
+    protected virtual async Task SaveChangesAsync(CancellationToken ct) => await db.SaveChangesAsync(ct);
+
+    private sealed class Transaction(IDbContextTransaction tx) : ICartTransaction
+    {
+        public Task CommitAsync(CancellationToken ct) => tx.CommitAsync(ct);
+
+        public ValueTask DisposeAsync() => tx.DisposeAsync();
+
     }
 
 }

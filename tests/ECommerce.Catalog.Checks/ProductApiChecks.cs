@@ -351,7 +351,7 @@ internal static class ProductApiChecks
             (await devClient.GetAsync("/swagger/index.html")).StatusCode == HttpStatusCode.OK,
             "Swagger UI is available in development");
 
-        Console.WriteLine("Product HTTP workflow checks passed (repository test double).");
+        Console.WriteLine("Product HTTP workflow checks passed (service persistence test double).");
 
     }
 

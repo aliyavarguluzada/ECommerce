@@ -1,12 +1,12 @@
 using System.Net;
 using System.Net.Http.Json;
-using ECommerce.Catalog.Application.Abstractions;
+using ECommerce.Catalog.Application;
+using ECommerce.Catalog.Infrastructure;
 using ECommerce.Catalog.Application.Categories;
 using ECommerce.Catalog.Domain.Aggregates.Categories;
 using ECommerce.Catalog.Domain.Aggregates.Products;
 using ECommerce.Catalog.Application.Products;
 using ECommerce.Catalog.Application.Common;
-using ECommerce.Catalog.Application.Products.Queries.GetProducts;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Testing;
@@ -107,7 +107,7 @@ internal static class CategoryApiChecks
 
         await CheckRemainingOperations(client, factory, category);
 
-        Console.WriteLine("Category HTTP workflow checks passed (repository test double).");
+        Console.WriteLine("Category HTTP workflow checks passed (service persistence test double).");
 
     }
 
@@ -277,25 +277,9 @@ internal sealed class CategoryApiFactory : WebApplicationFactory<ECommerce.Catal
 
         builder.ConfigureServices(services =>
         {
-            services.RemoveAll<ICategoryRepository>();
-
-            services.RemoveAll<IUnitOfWork>();
-
-            services.RemoveAll<IProductRepository>();
-
-            services.RemoveAll<IProductQueries>();
-
+            services.RemoveAll<ICatalogService>();
             services.AddSingleton(Database);
-
-            services.AddScoped<FakeCategorySession>();
-
-            services.AddScoped<ICategoryRepository>(sp => sp.GetRequiredService<FakeCategorySession>());
-
-            services.AddScoped<IUnitOfWork>(sp => sp.GetRequiredService<FakeCategorySession>());
-
-            services.AddScoped<IProductRepository>(sp => sp.GetRequiredService<FakeCategorySession>());
-
-            services.AddScoped<IProductQueries>(sp => sp.GetRequiredService<FakeCategorySession>());
+            services.AddScoped<ICatalogService, FakeCategorySession>();
 
         });
 
@@ -318,7 +302,7 @@ internal sealed class FakeCategoryDatabase
 }
 
 internal sealed class FakeCategorySession(
-    FakeCategoryDatabase database) : ICategoryRepository, IProductRepository, IProductQueries, IUnitOfWork
+    FakeCategoryDatabase database) : CatalogService(null!)
 {
     private Category? _pending;
 
@@ -326,17 +310,17 @@ internal sealed class FakeCategorySession(
 
     private Product? _pendingProduct;
 
-    public Task<bool> NameExistsAsync(
+    protected override Task<bool> CategoryNameExistsAsync(
         string name,
         Guid? excludingId = null,
         CancellationToken cancellationToken = default) => Task.FromResult(
         database.Categories.Values.Any(x => x.Name == name && x.Id != excludingId));
 
-    public Task<IReadOnlyList<Category>> GetAllAsync(
+    protected override Task<IReadOnlyList<Category>> ReadCategoriesAsync(
         CancellationToken cancellationToken = default) => Task.FromResult<IReadOnlyList<Category>>(
         database.Categories.Values.OrderBy(x => x.Name).ThenBy(x => x.Id).ToArray());
 
-    public Task<Category?> GetForUpdateAsync(Guid id, CancellationToken cancellationToken = default)
+    protected override Task<Category?> FindCategoryForUpdateAsync(Guid id, CancellationToken cancellationToken = default)
     {
         var category = database.Categories.GetValueOrDefault(id);
 
@@ -351,12 +335,12 @@ internal sealed class FakeCategorySession(
         return Task.FromResult(_pending);
     }
 
-    public Task<bool> HasProductsAsync(
+    protected override Task<bool> CategoryHasProductsAsync(
         Guid id,
         CancellationToken cancellationToken = default) => Task.FromResult(
         database.CategoriesWithProducts.Contains(id) || database.Products.Values.Any(x => x.CategoryId == id));
 
-    public void Remove(Category category)
+    protected override void RemoveCategory(Category category)
     {
         _pending = category;
 
@@ -364,19 +348,19 @@ internal sealed class FakeCategorySession(
 
     }
 
-    public Task<Category?> GetByIdAsync(
+    protected override Task<Category?> FindCategoryAsync(
         Guid id,
         CancellationToken cancellationToken = default) => Task.FromResult(
         database.Categories.GetValueOrDefault(id));
 
-    public Task AddAsync(Category category, CancellationToken cancellationToken = default)
+    protected override Task AddCategoryAsync(Category category, CancellationToken cancellationToken = default)
     {
         _pending = category;
 
         return Task.CompletedTask;
     }
 
-    public Task<int> SaveChangesAsync(CancellationToken cancellationToken = default)
+    protected override Task<int> SaveChangesAsync(CancellationToken cancellationToken = default)
     {
         if (database.NextCommitFailure is { } failure)
         {
@@ -417,7 +401,7 @@ internal sealed class FakeCategorySession(
         return Task.FromResult(1);
     }
 
-    Task<Product?> IProductRepository.GetForUpdateAsync(Guid id, CancellationToken cancellationToken)
+    protected override Task<Product?> FindProductForUpdateAsync(Guid id, CancellationToken cancellationToken)
     {
         var product = database.Products.GetValueOrDefault(id);
 
@@ -430,22 +414,24 @@ internal sealed class FakeCategorySession(
         return Task.FromResult(_pendingProduct);
     }
 
-    public Task AddAsync(Product product, CancellationToken cancellationToken = default)
+    protected override Task AddProductAsync(Product product, CancellationToken cancellationToken = default)
     {
         _pendingProduct = product;
 
         return Task.CompletedTask;
     }
 
-    Task<ProductResponse?> IProductQueries.GetByIdAsync(
+    protected override Task<ProductResponse?> ReadProductAsync(
         Guid id,
         CancellationToken cancellationToken) => Task.FromResult(
         database.Products.TryGetValue(id, out var product) ? Respond(product) : null);
 
-    public Task<PagedResult<ProductResponse>> GetAllAsync(
-        GetProductsQuery query,
+    protected override Task<PagedResult<ProductResponse>> ReadProductsAsync(
+        ProductFilter query,
         CancellationToken cancellationToken = default)
     {
+        query.Validate();
+
         var products = database.Products.Values.AsEnumerable();
 
         var activeFilter = query.IsActive ?? (query.IncludeInactive ? (bool? )null : true);

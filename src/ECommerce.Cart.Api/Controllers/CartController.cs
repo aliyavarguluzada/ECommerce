@@ -7,7 +7,7 @@ namespace ECommerce.Cart.Api.Controllers;
 
 [ApiController, Authorize(Policy = "Customer"), Route("api/cart")]
 
-public sealed class CartController(CartService service) : ControllerBase
+public sealed class CartController(ICartService service) : ControllerBase
 {
     [HttpGet]
 
@@ -17,7 +17,7 @@ public sealed class CartController(CartService service) : ControllerBase
 
     [HttpPut("items/{productId:guid}")]
 
-    public async Task<IActionResult> Set(Guid productId, SetQuantityCommand command, CancellationToken ct)
+    public async Task<IActionResult> Set(Guid productId, SetQuantityRequest command, CancellationToken ct)
     {
         await service.SetAsync(User.CustomerId(), productId, command.Quantity, ct);
 
@@ -44,7 +44,7 @@ public sealed class CartController(CartService service) : ControllerBase
 
     [HttpPost("checkout")]
 
-    public async Task<ActionResult<OrderSnapshot>> Checkout(CheckoutCommand command, CancellationToken ct)
+    public async Task<ActionResult<OrderSnapshot>> Checkout(CheckoutRequest command, CancellationToken ct)
     {
         var order = await service.CheckoutAsync(User.CustomerId(), command, ct);
 

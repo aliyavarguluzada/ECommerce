@@ -1,6 +1,5 @@
 using System.Text.Json.Serialization;
 using ECommerce.Inventory.Api.Common;
-using ECommerce.Inventory.Application;
 using ECommerce.Inventory.Infrastructure;
 using Microsoft.AspNetCore.Diagnostics.HealthChecks;
 using Microsoft.EntityFrameworkCore;
@@ -29,8 +28,6 @@ public class Program
         builder.Services.AddProblemDetails();
 
         builder.Services.AddExceptionHandler<ServiceExceptionHandler>();
-
-        builder.Services.AddApplication();
 
         builder.Services.AddInfrastructure(
             builder.Configuration.GetConnectionString("InventoryDatabase") ?? throw new InvalidOperationException("InventoryDatabase connection string is required."),

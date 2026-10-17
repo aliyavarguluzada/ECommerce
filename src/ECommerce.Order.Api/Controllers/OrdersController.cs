@@ -13,7 +13,7 @@ public sealed record CreateCustomerOrder(
 
 [ApiController, Route("api/orders")]
 
-public sealed class OrdersController(OrderService service) : ControllerBase
+public sealed class OrdersController(IOrderService service) : ControllerBase
 {
     [HttpGet, Authorize(Policy = "Customer")]
 
@@ -46,7 +46,7 @@ public sealed class OrdersController(OrderService service) : ControllerBase
     [HttpPost("internal"), Authorize(Policy = "CartService")]
 
     public async Task<ActionResult<OrderResponse>> InternalCreate(
-        CreateOrderCommand command,
+        CreateOrderRequest command,
         CancellationToken ct) => Created(
         await service.CreateAsync(command, ct));
 
@@ -63,7 +63,7 @@ public sealed class OrdersController(OrderService service) : ControllerBase
 
     public async Task<ActionResult<OrderResponse>> RecordPayment(
         Guid id,
-        RecordPaymentCommand command,
+        RecordPaymentRequest command,
         CancellationToken ct) => Ok(
         await service.RecordPaymentAsync(id, command, ct));
 
@@ -76,7 +76,7 @@ public sealed class OrdersController(OrderService service) : ControllerBase
 
     [HttpPost("{id:guid}/cancel"), Authorize(Policy = "Customer")]
 
-    public async Task<ActionResult<OrderResponse>> Cancel(Guid id, CancelOrderCommand command, CancellationToken ct)
+    public async Task<ActionResult<OrderResponse>> Cancel(Guid id, CancelOrderRequest command, CancellationToken ct)
     {
         await Owned(id, ct);
 
@@ -96,7 +96,7 @@ public sealed class OrdersController(OrderService service) : ControllerBase
 
     public async Task<ActionResult<OrderResponse>> Ship(
         Guid id,
-        ShipOrderCommand command,
+        ShipOrderRequest command,
         CancellationToken ct) => Ok(
         await service.ShipAsync(id, command, ct));
 

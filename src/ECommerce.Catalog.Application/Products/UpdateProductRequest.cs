@@ -1,8 +1,8 @@
 using System.Text.Json.Serialization;
 
-namespace ECommerce.Catalog.Application.Products.Commands.UpdateProduct;
+namespace ECommerce.Catalog.Application.Products;
 
-public sealed record UpdateProductCommand(
+public sealed record UpdateProductRequest(
     string Name,
     string? Description,
     [property: JsonRequired] decimal Price,

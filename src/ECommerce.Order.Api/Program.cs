@@ -1,6 +1,5 @@
 using System.Text.Json.Serialization;
 using ECommerce.Order.Api.Common;
-using ECommerce.Order.Application;
 using ECommerce.Order.Infrastructure;
 using Microsoft.AspNetCore.Diagnostics.HealthChecks;
 using Microsoft.EntityFrameworkCore;
@@ -29,8 +28,6 @@ public class Program
         builder.Services.AddProblemDetails();
 
         builder.Services.AddExceptionHandler<ServiceExceptionHandler>();
-
-        builder.Services.AddApplication();
 
         builder.Services.AddHostedService<OrderRecoveryWorker>();
 

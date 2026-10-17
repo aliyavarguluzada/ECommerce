@@ -15,27 +15,27 @@ public sealed class IdentityController(IIdentityService service) : ControllerBas
     [HttpPost("register"), AllowAnonymous, EnableRateLimiting("identity")]
 
     public async Task<ActionResult<TokenResponse>> Register(
-        RegisterCommand command,
+        RegisterRequest command,
         CancellationToken ct) => Ok(
         await service.RegisterAsync(command, ct));
 
     [HttpPost("login"), AllowAnonymous, EnableRateLimiting("identity")]
 
     public async Task<ActionResult<TokenResponse>> Login(
-        LoginCommand command,
+        LoginRequest command,
         CancellationToken ct) => Ok(
         await service.LoginAsync(command, ct));
 
     [HttpPost("refresh"), AllowAnonymous, EnableRateLimiting("identity")]
 
     public async Task<ActionResult<TokenResponse>> Refresh(
-        RefreshCommand command,
+        RefreshRequest command,
         CancellationToken ct) => Ok(
         await service.RefreshAsync(command.RefreshToken, ct));
 
     [HttpPost("logout"), Authorize(Policy = "Customer")]
 
-    public async Task<IActionResult> Logout(RefreshCommand command, CancellationToken ct)
+    public async Task<IActionResult> Logout(RefreshRequest command, CancellationToken ct)
     {
         await service.LogoutAsync(User.CustomerId(), command.RefreshToken, ct);
 
@@ -60,13 +60,13 @@ public sealed class IdentityController(IIdentityService service) : ControllerBas
     [HttpPut("me"), Authorize(Policy = "Customer")]
 
     public async Task<ActionResult<UserProfile>> Update(
-        ProfileCommand command,
+        ProfileRequest command,
         CancellationToken ct) => Ok(
         await service.UpdateProfileAsync(User.CustomerId(), command, ct));
 
     [HttpPost("change-password"), Authorize(Policy = "Customer")]
 
-    public async Task<IActionResult> ChangePassword(ChangePasswordCommand command, CancellationToken ct)
+    public async Task<IActionResult> ChangePassword(ChangePasswordRequest command, CancellationToken ct)
     {
         await service.ChangePasswordAsync(User.CustomerId(), command, ct);
 
@@ -77,7 +77,7 @@ public sealed class IdentityController(IIdentityService service) : ControllerBas
 
     public async Task<ActionResult<UserProfile>> Admin(
         Guid id,
-        RoleCommand command,
+        RoleRequest command,
         CancellationToken ct) => Ok(
         await service.SetAdminAsync(User.CustomerId(), id, command.IsAdmin, ct));
 

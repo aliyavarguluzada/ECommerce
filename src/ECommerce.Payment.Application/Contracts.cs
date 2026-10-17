@@ -2,7 +2,7 @@ using ECommerce.Payment.Domain;
 
 namespace ECommerce.Payment.Application;
 
-public sealed record PayCommand(Guid RequestId, Guid OrderId, string MethodToken);
+public sealed record PayRequest(Guid RequestId, Guid OrderId, string MethodToken);
 
 public sealed record OrderSnapshot(Guid Id, Guid CustomerId, string Status, string Currency, decimal Total);
 
@@ -46,24 +46,6 @@ public sealed record PagedResult<T>(IReadOnlyList<T> Items, int TotalCount, int 
 public interface IPaymentTransaction : IAsyncDisposable
 {
     Task CommitAsync(CancellationToken ct);
-
-}
-
-public interface IPaymentStore
-{
-    Task<IPaymentTransaction> BeginAsync(Guid orderId, CancellationToken ct);
-
-    Task<PaymentRecord?> FindAsync(Guid id, CancellationToken ct);
-
-    Task<PaymentRecord?> FindActiveByOrderAsync(Guid orderId, CancellationToken ct);
-
-    Task<IReadOnlyList<Guid>> GetRecoveryIdsAsync(int limit, CancellationToken ct);
-
-    Task<PagedResult<PaymentResponse>> ListAsync(Guid? customerId, int page, int size, CancellationToken ct);
-
-    void Add(PaymentRecord payment);
-
-    Task SaveAsync(CancellationToken ct);
 
 }
 

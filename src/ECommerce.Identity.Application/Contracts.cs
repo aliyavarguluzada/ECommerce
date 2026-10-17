@@ -3,17 +3,17 @@ using System.Text.Json.Serialization;
 
 namespace ECommerce.Identity.Application;
 
-public sealed record RegisterCommand([EmailAddress] string Email, string Password, string DisplayName);
+public sealed record RegisterRequest([EmailAddress] string Email, string Password, string DisplayName);
 
-public sealed record LoginCommand([EmailAddress] string Email, string Password);
+public sealed record LoginRequest([EmailAddress] string Email, string Password);
 
-public sealed record RefreshCommand(string RefreshToken);
+public sealed record RefreshRequest(string RefreshToken);
 
-public sealed record ChangePasswordCommand(string CurrentPassword, string NewPassword);
+public sealed record ChangePasswordRequest(string CurrentPassword, string NewPassword);
 
-public sealed record ProfileCommand(string DisplayName);
+public sealed record ProfileRequest(string DisplayName);
 
-public sealed record RoleCommand([property: JsonRequired] bool IsAdmin);
+public sealed record RoleRequest([property: JsonRequired] bool IsAdmin);
 
 public sealed record UserProfile(Guid Id, string Email, string DisplayName, IReadOnlyList<string> Roles, bool IsActive);
 
@@ -21,9 +21,9 @@ public sealed record TokenResponse(string AccessToken, string RefreshToken, Date
 
 public interface IIdentityService
 {
-    Task<TokenResponse> RegisterAsync(RegisterCommand command, CancellationToken ct);
+    Task<TokenResponse> RegisterAsync(RegisterRequest command, CancellationToken ct);
 
-    Task<TokenResponse> LoginAsync(LoginCommand command, CancellationToken ct);
+    Task<TokenResponse> LoginAsync(LoginRequest command, CancellationToken ct);
 
     Task<TokenResponse> RefreshAsync(string refreshToken, CancellationToken ct);
 
@@ -33,9 +33,9 @@ public interface IIdentityService
 
     Task<UserProfile> GetAsync(Guid userId, CancellationToken ct);
 
-    Task<UserProfile> UpdateProfileAsync(Guid userId, ProfileCommand command, CancellationToken ct);
+    Task<UserProfile> UpdateProfileAsync(Guid userId, ProfileRequest command, CancellationToken ct);
 
-    Task ChangePasswordAsync(Guid userId, ChangePasswordCommand command, CancellationToken ct);
+    Task ChangePasswordAsync(Guid userId, ChangePasswordRequest command, CancellationToken ct);
 
     Task<UserProfile> SetAdminAsync(Guid actorId, Guid userId, bool isAdmin, CancellationToken ct);
 

@@ -32,7 +32,7 @@ public sealed class OrderRecoveryWorker(
 
                 using (var scope = scopes.CreateScope())
                 {
-                    ids = await scope.ServiceProvider.GetRequiredService<IOrderStore>().GetRecoveryIdsAsync(
+                    ids = await scope.ServiceProvider.GetRequiredService<IOrderService>().GetRecoveryIdsAsync(
                         cutoff,
                         batchSize,
                         stoppingToken);
@@ -45,7 +45,7 @@ public sealed class OrderRecoveryWorker(
                     {
                         using var scope = scopes.CreateScope();
 
-                        await scope.ServiceProvider.GetRequiredService<OrderService>().RecoverAsync(
+                        await scope.ServiceProvider.GetRequiredService<IOrderService>().RecoverAsync(
                             id,
                             cutoff,
                             stoppingToken);

@@ -25,7 +25,7 @@ public sealed class PaymentRecoveryWorker(
 
                 using (var scope = scopes.CreateScope())
                 {
-                    ids = await scope.ServiceProvider.GetRequiredService<IPaymentStore>().GetRecoveryIdsAsync(
+                    ids = await scope.ServiceProvider.GetRequiredService<IPaymentService>().GetRecoveryIdsAsync(
                         50,
                         stoppingToken);
 
@@ -37,7 +37,7 @@ public sealed class PaymentRecoveryWorker(
                     {
                         using var scope = scopes.CreateScope();
 
-                        await scope.ServiceProvider.GetRequiredService<PaymentService>().RecoverAsync(
+                        await scope.ServiceProvider.GetRequiredService<IPaymentService>().RecoverAsync(
                             id,
                             stoppingToken);
 

@@ -12,13 +12,13 @@ public sealed class CommerceWorld
 {
     public Dictionary<Guid, CatalogEntry> Products { get; } = [];
 
-    public InventoryStore InventoryStore { get; } = new();
+    public InventoryTestService InventoryStore => (InventoryTestService)Inventory;
 
-    public OrderStore OrderStore { get; } = new();
+    public OrderTestService OrderStore => (OrderTestService)Order;
 
-    public CartStore CartStore { get; } = new();
+    public CartTestService CartStore => (CartTestService)Cart;
 
-    public PaymentStore PaymentStore { get; } = new();
+    public PaymentTestService PaymentStore => (PaymentTestService)Payment;
 
     public ProviderSpy Provider { get; } = new();
 
@@ -30,35 +30,35 @@ public sealed class CommerceWorld
 
     public CartOrderAdapter CartOrderClient { get; }
 
-    public Inv.InventoryService Inventory { get; }
+    public ECommerce.Inventory.Infrastructure.InventoryService Inventory { get; }
 
-    public Ord.OrderService Order { get; }
+    public ECommerce.Order.Infrastructure.OrderService Order { get; }
 
-    public Car.CartService Cart { get; }
+    public ECommerce.Cart.Infrastructure.CartService Cart { get; }
 
-    public Pay.PaymentService Payment { get; }
+    public ECommerce.Payment.Infrastructure.PaymentService Payment { get; }
 
     public CommerceWorld()
     {
         Catalog = new(Products);
 
-        Inventory = new(InventoryStore, Catalog);
+        Inventory = new InventoryTestService(Catalog);
 
         InventoryClient = new(Inventory);
 
         var refunds = new RefundAdapter();
 
-        Order = new(OrderStore, Catalog, InventoryClient, refunds);
+        Order = new OrderTestService(Catalog, InventoryClient, refunds);
 
         PaymentOrderClient = new(Order);
 
-        Payment = new(PaymentStore, PaymentOrderClient, Provider);
+        Payment = new PaymentTestService(PaymentOrderClient, Provider);
 
         refunds.Payment = Payment;
 
         CartOrderClient = new(Order);
 
-        Cart = new(CartStore, Catalog, CartOrderClient);
+        Cart = new CartTestService(Catalog, CartOrderClient);
 
     }
 
@@ -82,7 +82,7 @@ public sealed class CommerceWorld
 
     public static Car.AddressRequest CartAddress() => new("Customer", "1 Street", null, "Baku", null, "AZ1000", "AZ");
 
-    public Ord.CreateOrderCommand NewOrder(
+    public Ord.CreateOrderRequest NewOrder(
         Guid product,
         Guid? customer = null,
         int quantity = 2) => new(
@@ -176,7 +176,7 @@ public sealed class CatalogClients(
 
 }
 
-public sealed class InventoryAdapter(Inv.InventoryService inventory) : Ord.IInventoryClient
+public sealed class InventoryAdapter(ECommerce.Inventory.Infrastructure.InventoryService inventory) : Ord.IInventoryClient
 {
     public bool Unavailable { get; set; }
 
@@ -248,7 +248,7 @@ public sealed class InventoryAdapter(Inv.InventoryService inventory) : Ord.IInve
 
 public sealed class RefundAdapter : Ord.IPaymentClient
 {
-    public Pay.PaymentService Payment { get; set; } = null!;
+    public ECommerce.Payment.Infrastructure.PaymentService Payment { get; set; } = null!;
 
     public async Task<Ord.RefundSnapshot> RefundAsync(Guid id, CancellationToken ct)
     {
@@ -269,7 +269,7 @@ public sealed class RefundAdapter : Ord.IPaymentClient
 
 }
 
-public sealed class PaymentOrderAdapter(Ord.OrderService orders) : Pay.IOrderClient
+public sealed class PaymentOrderAdapter(ECommerce.Order.Infrastructure.OrderService orders) : Pay.IOrderClient
 {
     public bool NotificationUnavailable { get; set; }
 
@@ -320,7 +320,7 @@ public sealed class PaymentOrderAdapter(Ord.OrderService orders) : Pay.IOrderCli
 
 }
 
-public sealed class CartOrderAdapter(Ord.OrderService orders) : Car.IOrderClient
+public sealed class CartOrderAdapter(ECommerce.Order.Infrastructure.OrderService orders) : Car.IOrderClient
 {
     public bool LoseNextCreateResponse { get; set; }
 

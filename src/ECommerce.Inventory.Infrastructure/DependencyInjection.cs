@@ -13,7 +13,7 @@ public static class DependencyInjection
     {
         services.AddDbContext<InventoryDbContext>(options => options.UseNpgsql(connection));
 
-        services.AddScoped<IInventoryStore, InventoryStore>();
+        services.AddScoped<IInventoryService, InventoryService>();
 
         services.AddHttpClient<ICatalogClient, CatalogClient>(client =>
         {

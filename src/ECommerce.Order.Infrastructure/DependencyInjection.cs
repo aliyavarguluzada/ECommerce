@@ -16,7 +16,7 @@ public static class DependencyInjection
     {
         services.AddDbContext<OrderDbContext>(options => options.UseNpgsql(connection));
 
-        services.AddScoped<IOrderStore, OrderStore>();
+        services.AddScoped<IOrderService, OrderService>();
 
         services.AddHttpClient<ICatalogClient, CatalogClient>(client =>
         {

@@ -8,11 +8,11 @@ namespace ECommerce.Payment.Api.Controllers;
 
 [ApiController, Route("api/payments")]
 
-public sealed class PaymentsController(PaymentService service) : ControllerBase
+public sealed class PaymentsController(IPaymentService service) : ControllerBase
 {
     [HttpPost, Authorize(Policy = "Customer")]
 
-    public async Task<ActionResult<PaymentResponse>> Pay(PayCommand command, CancellationToken ct)
+    public async Task<ActionResult<PaymentResponse>> Pay(PayRequest command, CancellationToken ct)
     {
         var payment = await service.PayAsync(User.CustomerId(), command, ct);
 

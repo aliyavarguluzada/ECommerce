@@ -61,15 +61,15 @@ public static class FakeApiServices
 {
     public static void Inventory(
         IServiceCollection services,
-        CommerceWorld world) => Replace(
+        CommerceWorld world) => Replace<ECommerce.Inventory.Application.IInventoryService>(
         services,
         world.Inventory);
 
-    public static void Order(IServiceCollection services, CommerceWorld world) => Replace(services, world.Order);
+    public static void Order(IServiceCollection services, CommerceWorld world) => Replace<ECommerce.Order.Application.IOrderService>(services, world.Order);
 
-    public static void Cart(IServiceCollection services, CommerceWorld world) => Replace(services, world.Cart);
+    public static void Cart(IServiceCollection services, CommerceWorld world) => Replace<ECommerce.Cart.Application.ICartService>(services, world.Cart);
 
-    public static void Payment(IServiceCollection services, CommerceWorld world) => Replace(services, world.Payment);
+    public static void Payment(IServiceCollection services, CommerceWorld world) => Replace<ECommerce.Payment.Application.IPaymentService>(services, world.Payment);
 
     public static void Identity(
         IServiceCollection services) => Replace<IIdentityService>(
@@ -95,12 +95,12 @@ public static class FakeApiServices
 internal sealed class IdentityApiStub : IIdentityService
 {
     public Task<TokenResponse> RegisterAsync(
-        RegisterCommand command,
+        RegisterRequest command,
         CancellationToken ct) => Task.FromResult(
         Tokens(command.Email));
 
     public Task<TokenResponse> LoginAsync(
-        LoginCommand command,
+        LoginRequest command,
         CancellationToken ct) => Task.FromResult(
         Tokens(command.Email));
 
@@ -117,13 +117,13 @@ internal sealed class IdentityApiStub : IIdentityService
 
     public Task<UserProfile> UpdateProfileAsync(
         Guid user,
-        ProfileCommand command,
+        ProfileRequest command,
         CancellationToken ct) => Task.FromResult(
         Profile(user)with { DisplayName = command.DisplayName });
 
     public Task ChangePasswordAsync(
         Guid user,
-        ChangePasswordCommand command,
+        ChangePasswordRequest command,
         CancellationToken ct) => Task.CompletedTask;
 
     public Task<UserProfile> SetAdminAsync(

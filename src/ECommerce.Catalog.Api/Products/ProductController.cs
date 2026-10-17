@@ -1,11 +1,6 @@
+using ECommerce.Catalog.Application;
 using ECommerce.Catalog.Application.Common;
 using ECommerce.Catalog.Application.Products;
-using ECommerce.Catalog.Application.Products.Commands.CreateProduct;
-using ECommerce.Catalog.Application.Products.Commands.UpdateProduct;
-using ECommerce.Catalog.Application.Products.Commands.ChangeProductPrice;
-using ECommerce.Catalog.Application.Products.Commands.DiscontinueProduct;
-using ECommerce.Catalog.Application.Products.Queries.GetProductById;
-using ECommerce.Catalog.Application.Products.Queries.GetProducts;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Authorization;
 
@@ -15,13 +10,7 @@ namespace ECommerce.Catalog.Api.Products;
 
 [Route("api/products")]
 
-public sealed class ProductController(
-    CreateProductHandler createHandler,
-    UpdateProductHandler updateHandler,
-    ChangeProductPriceHandler priceHandler,
-    DiscontinueProductHandler discontinueHandler,
-    GetProductByIdHandler getHandler,
-    GetProductsHandler listHandler) : ControllerBase
+public sealed class ProductController(ICatalogService service) : ControllerBase
 {
     [HttpGet]
 
@@ -30,9 +19,9 @@ public sealed class ProductController(
     [ProducesResponseType<ProblemDetails>(StatusCodes.Status400BadRequest)]
 
     public async Task<ActionResult<PagedResult<ProductResponse>>> GetAll(
-        [FromQuery] GetProductsQuery query,
+        [FromQuery] ProductFilter query,
         CancellationToken cancellationToken) => Ok(
-        await listHandler.HandleAsync(query, cancellationToken));
+        await service.GetProductsAsync(query, cancellationToken));
 
     [HttpGet("{id:guid}")]
 
@@ -42,7 +31,7 @@ public sealed class ProductController(
 
     public async Task<ActionResult<ProductResponse>> GetById(Guid id, CancellationToken cancellationToken)
     {
-        var product = await getHandler.HandleAsync(id, cancellationToken);
+        var product = await service.GetProductAsync(id, cancellationToken);
 
         return product is null ? NotFound() : Ok(product);
     }
@@ -56,10 +45,10 @@ public sealed class ProductController(
     [ProducesResponseType<ProblemDetails>(StatusCodes.Status400BadRequest)]
 
     public async Task<ActionResult<ProductResponse>> Create(
-        CreateProductCommand command,
+        CreateProductRequest command,
         CancellationToken cancellationToken)
     {
-        var product = await createHandler.HandleAsync(command, cancellationToken);
+        var product = await service.CreateProductAsync(command, cancellationToken);
 
         return CreatedAtAction(nameof(GetById), new { id = product.Id }, product);
     }
@@ -78,8 +67,8 @@ public sealed class ProductController(
 
     public async Task<IActionResult> Update(
         Guid id,
-        UpdateProductCommand command,
-        CancellationToken cancellationToken) => await updateHandler.HandleAsync(
+        UpdateProductRequest command,
+        CancellationToken cancellationToken) => await service.UpdateProductAsync(
         id,
         command,
         cancellationToken) ? NoContent() : NotFound();
@@ -98,8 +87,8 @@ public sealed class ProductController(
 
     public async Task<IActionResult> ChangePrice(
         Guid id,
-        ChangeProductPriceCommand command,
-        CancellationToken cancellationToken) => await priceHandler.HandleAsync(
+        ChangeProductPriceRequest command,
+        CancellationToken cancellationToken) => await service.ChangeProductPriceAsync(
         id,
         command,
         cancellationToken) ? NoContent() : NotFound();
@@ -118,7 +107,7 @@ public sealed class ProductController(
 
     public async Task<IActionResult> Discontinue(
         Guid id,
-        CancellationToken cancellationToken) => await discontinueHandler.HandleAsync(
+        CancellationToken cancellationToken) => await service.DiscontinueProductAsync(
         id,
         cancellationToken) ? NoContent() : NotFound();
 

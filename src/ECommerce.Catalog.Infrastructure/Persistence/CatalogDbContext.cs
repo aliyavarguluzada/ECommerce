@@ -1,4 +1,3 @@
-using ECommerce.Catalog.Application.Abstractions;
 using ECommerce.Catalog.Application.Categories;
 using ECommerce.Catalog.Application.Products;
 using ECommerce.Catalog.Domain.Aggregates.Categories;
@@ -8,7 +7,7 @@ using Npgsql;
 
 namespace ECommerce.Catalog.Infrastructure.Persistence;
 
-public sealed class CatalogDbContext(DbContextOptions<CatalogDbContext> options) : DbContext(options), IUnitOfWork
+public sealed class CatalogDbContext(DbContextOptions<CatalogDbContext> options) : DbContext(options)
 {
     public DbSet<Product> Products => Set<Product>();
 

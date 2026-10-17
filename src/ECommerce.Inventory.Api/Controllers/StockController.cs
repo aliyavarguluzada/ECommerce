@@ -10,7 +10,7 @@ namespace ECommerce.Inventory.Api.Controllers;
 
 [Route("api/inventory/stock")]
 
-public sealed class StockController(InventoryService service) : ControllerBase
+public sealed class StockController(IInventoryService service) : ControllerBase
 {
     [HttpGet]
 
@@ -30,7 +30,7 @@ public sealed class StockController(InventoryService service) : ControllerBase
 
     [HttpPost]
 
-    public async Task<ActionResult<StockResponse>> Create(CreateStockCommand command, CancellationToken ct)
+    public async Task<ActionResult<StockResponse>> Create(CreateStockRequest command, CancellationToken ct)
     {
         var stock = await service.CreateAsync(command, ct);
 
@@ -41,7 +41,7 @@ public sealed class StockController(InventoryService service) : ControllerBase
 
     public async Task<ActionResult<StockResponse>> Adjust(
         Guid productId,
-        AdjustStockCommand command,
+        AdjustStockRequest command,
         CancellationToken ct) => Ok(
         await service.AdjustAsync(productId, command, ct));
 

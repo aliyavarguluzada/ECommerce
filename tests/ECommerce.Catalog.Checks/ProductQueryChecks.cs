@@ -1,6 +1,6 @@
-using ECommerce.Catalog.Application.Products.Queries.GetProducts;
+using ECommerce.Catalog.Application.Products;
 using ECommerce.Catalog.Infrastructure.Persistence;
-using ECommerce.Catalog.Infrastructure.Persistence.Queries;
+using ECommerce.Catalog.Infrastructure;
 using Microsoft.EntityFrameworkCore;
 
 internal static class ProductQueryChecks
@@ -10,14 +10,14 @@ internal static class ProductQueryChecks
         using var db = new CatalogDbContext(
             new DbContextOptionsBuilder<CatalogDbContext>().UseNpgsql("Host=localhost;Database=checks;Username=checks;Password=checks").Options);
 
-        var queries = new ProductQueries(db);
+        var queries = new CatalogService(db);
 
         var id = Guid.NewGuid();
 
         var detailSql = queries.Project().Where(x => x.Id == id).ToQueryString();
 
         var filtered = queries.Filter(
-            new GetProductsQuery { CategoryId = id, Search = @"100%_\", PageSize = 10, PageNumber = 2 });
+            new ProductFilter { CategoryId = id, Search = @"100%_\", PageSize = 10, PageNumber = 2 });
 
         var pageSql = filtered.OrderBy(x => x.Name).ThenBy(x => x.Id).Skip(10).Take(10).ToQueryString();
 

@@ -3,7 +3,7 @@ using System.Text.Json.Serialization;
 
 namespace ECommerce.Order.Application;
 
-public sealed record CreateOrderCommand(
+public sealed record CreateOrderRequest(
     Guid RequestId,
     Guid CustomerId,
     AddressRequest ShippingAddress,
@@ -24,9 +24,9 @@ public sealed record AddressRequest(
 
 public sealed record OrderItemRequest(Guid ProductId, int Quantity);
 
-public sealed record CancelOrderCommand(string Reason);
+public sealed record CancelOrderRequest(string Reason);
 
-public sealed record ShipOrderCommand(string Carrier, string TrackingNumber);
+public sealed record ShipOrderRequest(string Carrier, string TrackingNumber);
 
 public sealed record OrderLineResponse(
     Guid ProductId,
@@ -71,7 +71,7 @@ public sealed record OrderResponse(
 
 }
 
-public sealed record RecordPaymentCommand(Guid PaymentId, decimal Amount, string Currency);
+public sealed record RecordPaymentRequest(Guid PaymentId, decimal Amount, string Currency);
 
 public sealed record RefundSnapshot(Guid PaymentId, string Status);
 

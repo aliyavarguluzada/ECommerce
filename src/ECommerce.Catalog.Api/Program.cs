@@ -1,5 +1,4 @@
 using ECommerce.Catalog.Api.Common;
-using ECommerce.Catalog.Application;
 using ECommerce.Catalog.Infrastructure;
 using Microsoft.AspNetCore.Diagnostics.HealthChecks;
 using ECommerce.Catalog.Infrastructure.Persistence;
@@ -27,8 +26,6 @@ public class Program
         builder.Services.AddProblemDetails();
 
         builder.Services.AddExceptionHandler<CatalogExceptionHandler>();
-
-        builder.Services.AddApplication();
 
         builder.Services.AddInfrastructure(
             builder.Configuration.GetConnectionString("CatalogDatabase") ?? throw new InvalidOperationException("CatalogDatabase connection string is required."));
