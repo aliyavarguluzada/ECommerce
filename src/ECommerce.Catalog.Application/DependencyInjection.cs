@@ -18,16 +18,28 @@ public static class DependencyInjection
     public static IServiceCollection AddApplication(this IServiceCollection services)
     {
         services.AddScoped<CreateCategoryHandler>();
+
         services.AddScoped<GetCategoryByIdHandler>();
+
         services.AddScoped<GetCategoriesHandler>();
+
         services.AddScoped<UpdateCategoryHandler>();
+
         services.AddScoped<DeleteCategoryHandler>();
+
         services.AddScoped<CreateProductHandler>();
+
         services.AddScoped<UpdateProductHandler>();
+
         services.AddScoped<ChangeProductPriceHandler>();
+
         services.AddScoped<DiscontinueProductHandler>();
+
         services.AddScoped<GetProductByIdHandler>();
+
         services.AddScoped<GetProductsHandler>();
+
         return services;
     }
+
 }

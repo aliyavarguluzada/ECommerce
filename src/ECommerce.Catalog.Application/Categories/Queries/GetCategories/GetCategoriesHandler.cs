@@ -7,6 +7,8 @@ public sealed class GetCategoriesHandler(ICategoryRepository repository)
     public async Task<IReadOnlyList<CategoryResponse>> HandleAsync(CancellationToken cancellationToken = default)
     {
         var categories = await repository.GetAllAsync(cancellationToken);
+
         return categories.Select(CategoryResponse.From).ToArray();
     }
+
 }

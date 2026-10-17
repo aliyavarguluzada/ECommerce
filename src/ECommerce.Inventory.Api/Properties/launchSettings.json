@@ -6,7 +6,9 @@
         "ASPNETCORE_ENVIRONMENT": "Development"
       },
       "dotnetRunMessages": true,
-      "applicationUrl": "http://localhost:5172"
+      "applicationUrl": "http://localhost:5172",
+      "launchBrowser": true,
+      "launchUrl": "swagger"
     },
     "https": {
       "commandName": "Project",
@@ -14,18 +16,22 @@
         "ASPNETCORE_ENVIRONMENT": "Development"
       },
       "dotnetRunMessages": true,
-      "applicationUrl": "https://localhost:7137;http://localhost:5172"
+      "applicationUrl": "https://localhost:7137;http://localhost:5172",
+      "launchBrowser": true,
+      "launchUrl": "swagger"
     },
     "Container (Dockerfile)": {
       "commandName": "Docker",
       "containerRunArguments": "--mount \"type=bind,source={ProjectDir}/../../security.local.json,target=/app/security.local.json,readonly\"",
-      "launchUrl": "{Scheme}://{ServiceHost}:{ServicePort}",
       "environmentVariables": {
         "ASPNETCORE_HTTPS_PORTS": "8081",
-        "ASPNETCORE_HTTP_PORTS": "8080"
+        "ASPNETCORE_HTTP_PORTS": "8080",
+        "ASPNETCORE_ENVIRONMENT": "Development"
       },
       "publishAllPorts": true,
-      "useSSL": true
+      "useSSL": true,
+      "launchBrowser": true,
+      "launchUrl": "{Scheme}://{ServiceHost}:{ServicePort}/swagger"
     }
   },
   "$schema": "https://json.schemastore.org/launchsettings.json"

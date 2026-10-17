@@ -1,14 +1,14 @@
-﻿using System;
+using System;
 using Microsoft.EntityFrameworkCore.Migrations;
 
 #nullable disable
 
 namespace ECommerce.Order.Infrastructure.Persistence.Migrations
 {
-    /// <inheritdoc />
+    /// <inheritdoc/>
     public partial class AddRecoveryTracking : Migration
     {
-        /// <inheritdoc />
+        /// <inheritdoc/>
         protected override void Up(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.AddColumn<DateTime>(
@@ -16,14 +16,16 @@ namespace ECommerce.Order.Infrastructure.Persistence.Migrations
                 table: "orders",
                 type: "timestamp with time zone",
                 nullable: true);
+
         }
 
-        /// <inheritdoc />
+        /// <inheritdoc/>
         protected override void Down(MigrationBuilder migrationBuilder)
         {
-            migrationBuilder.DropColumn(
-                name: "LastRecoveryAttemptAt",
-                table: "orders");
+            migrationBuilder.DropColumn(name: "LastRecoveryAttemptAt", table: "orders");
+
         }
+
     }
+
 }
