@@ -171,8 +171,8 @@ cancellation, shipping, delivery, and a durable HTTP recovery worker. Each servi
 owns its database; no message broker is required.
 
 See [Inventory and Order documentation](docs/inventory-and-order.md) for endpoints,
-recovery behavior, configuration, migration commands, and Docker setup. Test runs
-for these services are deferred; compilation and migration generation were completed.
+recovery behavior, configuration, migration commands, and Docker setup. Automated
+tests cover both services, including live PostgreSQL persistence and migrations.
 
 ## Catalog service
 
@@ -311,6 +311,7 @@ coverage matrix and instructions for optional live PostgreSQL tests.
 dotnet test tests/ECommerce.Tests/ECommerce.Tests.csproj '-p:Platform=AnyCPU'
 ```
 
-Current local result: **146 passed, 6 skipped, 0 failed**. The skipped tests require
-`ECOMMERCE_TEST_POSTGRES_CONNECTION`; no PostgreSQL server was available locally.
+Latest verification (2026-10-17): **152 passed, 0 skipped, 0 failed**, including all six
+live database tests against an isolated PostgreSQL 16 container. Live tests require
+`ECOMMERCE_TEST_POSTGRES_CONNECTION`; otherwise those six tests are skipped.
 Tests use temporary signing keys and service credentials. No real payments occur.

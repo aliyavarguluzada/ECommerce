@@ -118,8 +118,13 @@ public sealed class IdentityService(IdentityDbContext db, UserManager<Applicatio
         var claims = new List<Claim> { new("sub", user.Id.ToString()), new("email", user.Email!),
             new("jti", Guid.NewGuid().ToString()) };
         claims.AddRange(roles.Select(role => new Claim("role", role)));
+        // The RSA instance belongs to this call; cached providers must not retain it after disposal.
+        var signingKey = new RsaSecurityKey(rsa)
+        {
+            CryptoProviderFactory = new CryptoProviderFactory { CacheSignatureProviders = false }
+        };
         var jwt = new JwtSecurityToken(config["Auth:Issuer"] ?? "ecommerce-identity", config["Auth:Audience"] ?? "ecommerce",
-            claims, DateTime.UtcNow, expires, new SigningCredentials(new RsaSecurityKey(rsa), SecurityAlgorithms.RsaSha256));
+            claims, DateTime.UtcNow, expires, new SigningCredentials(signingKey, SecurityAlgorithms.RsaSha256));
         var access = new JwtSecurityTokenHandler().WriteToken(jwt);
         var refresh = WebEncoders.Base64UrlEncode(RandomNumberGenerator.GetBytes(64));
         db.RefreshSessions.Add(RefreshSession.Create(Hash(refresh), user.Id, family,

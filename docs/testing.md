@@ -64,9 +64,10 @@ Identity registration, duplicate accounts, refresh rotation/reuse revocation, lo
 password changes, role-change revocation, self-demotion rejection, and lockout.
 Other services and the payment provider remain test doubles in each database test.
 
-The current local run has **146 passed, 6 skipped, 0 failed**. PostgreSQL was not
-available in the development environment, so the six live tests have been compiled
-but not executed there.
+Latest verification (2026-10-17): **152 passed, 0 skipped, 0 failed**, with all six
+live tests running against a fresh PostgreSQL 16 container. No test schemas remained
+after the run, and the temporary container was removed. Without a configured
+connection, the default suite still skips the six live tests.
 
 ## Existing Catalog checks
 

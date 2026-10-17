@@ -18,6 +18,7 @@
     },
     "Container (Dockerfile)": {
       "commandName": "Docker",
+      "containerRunArguments": "--mount \"type=bind,source={ProjectDir}/../../security.local.json,target=/app/security.local.json,readonly\" --mount \"type=bind,source={ProjectDir}/../../identity.private.json,target=/app/identity.private.json,readonly\"",
       "launchUrl": "{Scheme}://{ServiceHost}:{ServicePort}",
       "environmentVariables": {
         "ASPNETCORE_HTTPS_PORTS": "8081",
