@@ -65,7 +65,6 @@ public static class Paging
         if (page < 1 || size is < 1 or > 100 || (long)(page - 1) * size > int.MaxValue)
         {
             throw new DomainException("Page must be positive, size must be 1–100, and page offset must fit a 32-bit integer.");
-
         }
 
     }

@@ -24,7 +24,6 @@ public sealed class IdentityService(
         if (command.Email.Trim().Length > 256 || command.Password.Length > 1024)
         {
             throw new ServiceException(400, "Email or password exceeds the supported length.");
-
         }
 
         var name = Name(command.DisplayName);
@@ -59,7 +58,6 @@ public sealed class IdentityService(
         if (command.Email.Trim().Length > 256 || command.Password.Length > 1024)
         {
             throw new ServiceException(401, "Invalid email or password.");
-
         }
 
         var user = await users.FindByEmailAsync(command.Email.Trim());
@@ -71,7 +69,6 @@ public sealed class IdentityService(
             _ = new PasswordHasher<ApplicationUser>().HashPassword(new ApplicationUser(), command.Password);
 
             throw new ServiceException(401, "Invalid email or password.");
-
         }
 
         await using var tx = await BeginUserAsync(user.Id, ct);
@@ -86,7 +83,6 @@ public sealed class IdentityService(
             await tx.CommitAsync(ct); // Preserve failed-attempt and lockout updates.
 
             throw new ServiceException(401, "Invalid email or password.");
-
         }
 
         var result = await IssueAsync(user, Guid.NewGuid(), ct);
@@ -114,7 +110,6 @@ public sealed class IdentityService(
         if (session is null)
         {
             throw new ServiceException(401, "Invalid refresh token.");
-
         }
 
         if (session.RevokedAt.HasValue)
@@ -127,7 +122,6 @@ public sealed class IdentityService(
             await tx.CommitAsync(ct);
 
             throw new ServiceException(401, "Refresh token reuse detected. Sign in again.");
-
         }
 
         var user = await users.FindByIdAsync(session.UserId.ToString());
@@ -135,7 +129,6 @@ public sealed class IdentityService(
         if (session.ExpiresAt <= DateTime.UtcNow || user is null || !user.IsActive || await users.IsLockedOutAsync(user))
         {
             throw new ServiceException(401, "Refresh token expired or account unavailable.");
-
         }
 
         var result = await IssueAsync(user, session.FamilyId, ct);
@@ -198,7 +191,6 @@ public sealed class IdentityService(
         if (command.CurrentPassword.Length > 1024 || command.NewPassword.Length > 1024)
         {
             throw new ServiceException(400, "Password exceeds the supported length.");
-
         }
 
         await using var tx = await BeginUserAsync(id, ct);
@@ -218,7 +210,6 @@ public sealed class IdentityService(
         if (actor == id && !admin)
         {
             throw new ServiceException(409, "Administrators cannot remove their own administrator role.");
-
         }
 
         await using var tx = await BeginUserAsync(id, ct);
@@ -255,7 +246,6 @@ public sealed class IdentityService(
         if (Convert.ToBase64String(rsa.ExportSubjectPublicKeyInfo()) != config["Auth:PublicKey"])
         {
             throw new InvalidOperationException("Identity private key does not match the configured public key.");
-
         }
 
         var roles = await users.GetRolesAsync(user);
@@ -342,7 +332,6 @@ public sealed class IdentityService(
             await tx.DisposeAsync();
 
             throw;
-
         }
 
     }
@@ -367,7 +356,6 @@ public sealed class IdentityService(
         if (string.IsNullOrWhiteSpace(token) || token.Length > 1024)
         {
             throw new ServiceException(401, "Invalid refresh token.");
-
         }
 
         return Convert.ToHexString(SHA256.HashData(Encoding.UTF8.GetBytes(token)));
@@ -378,7 +366,6 @@ public sealed class IdentityService(
         if (string.IsNullOrWhiteSpace(value) || value.Trim().Length > 150)
         {
             throw new ServiceException(400, "Display name must contain 1–150 characters.");
-
         }
 
         return value.Trim();
@@ -391,7 +378,6 @@ public sealed class IdentityService(
             throw new ServiceException(
                 result.Errors.Any(x => x.Code.StartsWith("Duplicate")) ? 409 : 400,
                 string.Join(" ", result.Errors.Select(x => x.Description)));
-
         }
 
     }

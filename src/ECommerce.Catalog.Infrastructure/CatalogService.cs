@@ -22,7 +22,6 @@ public class CatalogService(CatalogDbContext db) : ICatalogService
         if (await CategoryNameExistsAsync(category.Name, cancellationToken: cancellationToken))
         {
             throw new DuplicateCategoryException();
-
         }
 
         await AddCategoryAsync(category, cancellationToken);
@@ -44,7 +43,6 @@ public class CatalogService(CatalogDbContext db) : ICatalogService
         if (await CategoryHasProductsAsync(id, cancellationToken))
         {
             throw new CategoryInUseException();
-
         }
 
         RemoveCategory(category);
@@ -71,7 +69,6 @@ public class CatalogService(CatalogDbContext db) : ICatalogService
         if (await CategoryNameExistsAsync(category.Name, id, cancellationToken))
         {
             throw new DuplicateCategoryException();
-
         }
 
         await SaveChangesAsync(cancellationToken);
@@ -180,7 +177,6 @@ public class CatalogService(CatalogDbContext db) : ICatalogService
         if (await FindCategoryAsync(request.CategoryId, cancellationToken)is null)
         {
             throw new InvalidProductCategoryException();
-
         }
 
         await SaveChangesAsync(cancellationToken);

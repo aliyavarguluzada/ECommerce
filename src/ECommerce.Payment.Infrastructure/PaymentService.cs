@@ -12,7 +12,6 @@ public class PaymentService(PaymentDbContext db, IOrderClient orders, IPaymentPr
         if (request.RequestId == Guid.Empty || request.OrderId == Guid.Empty)
         {
             throw new ServiceException(400, "Request ID and order ID are required.");
-
         }
 
         var previous = await FindAsync(request.RequestId, ct);
@@ -22,7 +21,6 @@ public class PaymentService(PaymentDbContext db, IOrderClient orders, IPaymentPr
             if (previous.CustomerId != customer || previous.OrderId != request.OrderId || previous.MethodToken != request.MethodToken)
             {
                 throw new ServiceException(409, "Payment request ID was used for different content.");
-
             }
 
             return await ProcessAsync(previous.Id, ct);
@@ -33,13 +31,11 @@ public class PaymentService(PaymentDbContext db, IOrderClient orders, IPaymentPr
         if (order.CustomerId != customer)
         {
             throw new ServiceException(404, "Order not found.");
-
         }
 
         if (order.Status != "Reserved")
         {
             throw new ServiceException(409, "Only an order with reserved inventory can be paid.");
-
         }
 
         var payment = PaymentRecord.Create(
@@ -59,7 +55,6 @@ public class PaymentService(PaymentDbContext db, IOrderClient orders, IPaymentPr
                 if (previous.CustomerId != customer || previous.OrderId != request.OrderId || previous.MethodToken != request.MethodToken)
                 {
                     throw new ServiceException(409, "Payment request ID was used for different content.");
-
                 }
 
             }
@@ -71,7 +66,6 @@ public class PaymentService(PaymentDbContext db, IOrderClient orders, IPaymentPr
                     throw new ServiceException(
                         409,
                         "This order already has an active payment. Retry its original request.");
-
                 }
 
                 Add(payment);
@@ -94,7 +88,6 @@ public class PaymentService(PaymentDbContext db, IOrderClient orders, IPaymentPr
         if (!admin && payment.CustomerId != customer)
         {
             throw new ServiceException(404, "Payment not found.");
-
         }
 
         return PaymentResponse.From(payment);
@@ -105,7 +98,6 @@ public class PaymentService(PaymentDbContext db, IOrderClient orders, IPaymentPr
         if (page < 1 || size is < 1 or > 100 || (long)(page - 1) * size > int.MaxValue)
         {
             throw new ServiceException(400, "Invalid pagination.");
-
         }
 
         return ReadListAsync(customer, page, size, ct);
@@ -136,7 +128,6 @@ public class PaymentService(PaymentDbContext db, IOrderClient orders, IPaymentPr
                     if (order.Status != "Reserved")
                     {
                         throw new ServiceException(409, "Order is not ready for payment.");
-
                     }
 
                     var result = await provider.ChargeAsync(
@@ -208,7 +199,6 @@ public class PaymentService(PaymentDbContext db, IOrderClient orders, IPaymentPr
             if (payment.Status == PaymentStatus.Pending)
             {
                 throw new ServiceException(409, "Payment outcome is not known yet.");
-
             }
 
             if (payment.Status == PaymentStatus.Succeeded)
@@ -306,7 +296,6 @@ public class PaymentService(PaymentDbContext db, IOrderClient orders, IPaymentPr
             }
 
             throw new ServiceException(503, "Order confirmation is pending recovery.");
-
         }
 
         await using var tx = await BeginTransactionAsync(payment.OrderId, ct);
@@ -355,7 +344,6 @@ public class PaymentService(PaymentDbContext db, IOrderClient orders, IPaymentPr
             await tx.DisposeAsync();
 
             throw;
-
         }
 
     }

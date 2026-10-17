@@ -22,7 +22,6 @@ public sealed class OrderClient(HttpClient http) : IOrderClient
         catch (JsonException)
         {
             throw new ServiceException(503, "Order response is invalid.");
-
         }
 
     }
@@ -57,7 +56,6 @@ public sealed class OrderClient(HttpClient http) : IOrderClient
                 throw new ServiceException(
                     response.StatusCode == System.Net.HttpStatusCode.NotFound ? 404 : response.StatusCode == System.Net.HttpStatusCode.Conflict ? 409 : 503,
                     "Order is unavailable or not in the required state.");
-
             }
 
             return await response.Content.ReadAsStringAsync(ct);
@@ -66,13 +64,11 @@ public sealed class OrderClient(HttpClient http) : IOrderClient
         catch (HttpRequestException)
         {
             throw new ServiceException(503, "Order is unavailable.");
-
         }
 
         catch (TaskCanceledException)when (!ct.IsCancellationRequested)
         {
             throw new ServiceException(503, "Order request timed out.");
-
         }
 
     }

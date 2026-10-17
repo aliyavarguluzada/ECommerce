@@ -18,7 +18,6 @@ public sealed record AddressRequest(
             if (string.IsNullOrWhiteSpace(value) || value.Trim().Length > length)
             {
                 throw new ServiceException(400, "Invalid shipping address.");
-
             }
 
             return value.Trim();
@@ -29,7 +28,6 @@ public sealed record AddressRequest(
             if (value?.Trim().Length > length)
             {
                 throw new ServiceException(400, "Invalid shipping address.");
-
             }
 
             return string.IsNullOrWhiteSpace(value) ? null : value.Trim();
@@ -40,7 +38,6 @@ public sealed record AddressRequest(
         if (country.Length != 2 || country.Any(x => x is < 'A' or > 'Z'))
         {
             throw new ServiceException(400, "Country code must contain two letters.");
-
         }
 
         return new(

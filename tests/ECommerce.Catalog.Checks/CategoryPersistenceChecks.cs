@@ -18,7 +18,6 @@ internal static class CategoryPersistenceChecks
         if (duplicate is not DuplicateCategoryException)
         {
             throw new InvalidOperationException("Category unique-index violation must become a category conflict.");
-
         }
 
         var otherConstraint = await CaptureAsync("PK_categories", PostgresErrorCodes.UniqueViolation);
@@ -28,7 +27,6 @@ internal static class CategoryPersistenceChecks
         if (otherConstraint is not DbUpdateException || otherError is not DbUpdateException)
         {
             throw new InvalidOperationException("Unrelated persistence failures must not become category-name conflicts.");
-
         }
 
         var deletionRace = await CaptureAsync(
@@ -45,7 +43,6 @@ internal static class CategoryPersistenceChecks
         if (deletionRace is not CategoryInUseException || nonDeletion is not DbUpdateException || concurrency is not CategoryConcurrencyException)
         {
             throw new InvalidOperationException("Deletion FK and concurrency failures must be mapped selectively.");
-
         }
 
         var productCategoryRace = await CaptureAsync(
@@ -58,7 +55,6 @@ internal static class CategoryPersistenceChecks
         if (productCategoryRace is not InvalidProductCategoryException || productConcurrency is not ProductConcurrencyException)
         {
             throw new InvalidOperationException("Product FK and concurrency failures must be mapped selectively.");
-
         }
 
         Console.WriteLine("PostgreSQL conflict translation checks passed (injected provider errors).");
@@ -100,7 +96,6 @@ internal static class CategoryPersistenceChecks
         }
 
         throw new InvalidOperationException("Expected injected persistence failure.");
-
     }
 
     private sealed class FailureInterceptor(
@@ -118,7 +113,6 @@ internal static class CategoryPersistenceChecks
             if (concurrency)
             {
                 throw new InjectedConcurrencyException(entries);
-
             }
 
             throw new DbUpdateException(
@@ -130,7 +124,6 @@ internal static class CategoryPersistenceChecks
                     sqlState,
                     constraintName: constraint),
                 entries);
-
         }
 
     }

@@ -103,7 +103,6 @@ public sealed class CatalogClients(
         if (!products.TryGetValue(id, out var product))
         {
             throw new KeyNotFoundException();
-
         }
 
         return product;
@@ -114,7 +113,6 @@ public sealed class CatalogClients(
         if (Unavailable)
         {
             throw new Inv.ServiceException(503, "Catalog down.");
-
         }
 
         try
@@ -127,7 +125,6 @@ public sealed class CatalogClients(
         catch (KeyNotFoundException)
         {
             throw new Inv.ServiceException(400, "Product missing.");
-
         }
 
     }
@@ -137,7 +134,6 @@ public sealed class CatalogClients(
         if (Unavailable)
         {
             throw new Ord.ServiceException(503, "Catalog down.");
-
         }
 
         try
@@ -150,7 +146,6 @@ public sealed class CatalogClients(
         catch (KeyNotFoundException)
         {
             throw new Ord.ServiceException(400, "Product missing.");
-
         }
 
     }
@@ -160,7 +155,6 @@ public sealed class CatalogClients(
         if (Unavailable)
         {
             throw new Car.ServiceException(503, "Catalog down.");
-
         }
 
         return Task.FromResult(
@@ -190,7 +184,6 @@ public sealed class InventoryAdapter(ECommerce.Inventory.Infrastructure.Inventor
         if (Unavailable)
         {
             throw new Ord.ServiceException(503, "Inventory down.");
-
         }
 
         try
@@ -204,7 +197,6 @@ public sealed class InventoryAdapter(ECommerce.Inventory.Infrastructure.Inventor
                 LoseNextReserveResponse = false;
 
                 throw new Ord.ServiceException(503, "Response lost after reserve.");
-
             }
 
             return new(id, response.Status.ToString());
@@ -213,7 +205,6 @@ public sealed class InventoryAdapter(ECommerce.Inventory.Infrastructure.Inventor
         catch (Inv.ServiceException error)
         {
             throw new Ord.ServiceException(error.StatusCode, error.Message);
-
         }
 
     }
@@ -223,7 +214,6 @@ public sealed class InventoryAdapter(ECommerce.Inventory.Infrastructure.Inventor
         if (Unavailable)
         {
             throw new Ord.ServiceException(503, "Inventory down.");
-
         }
 
         var response = await inventory.CommitAsync(id, ct);
@@ -236,7 +226,6 @@ public sealed class InventoryAdapter(ECommerce.Inventory.Infrastructure.Inventor
         if (Unavailable)
         {
             throw new Ord.ServiceException(503, "Inventory down.");
-
         }
 
         var response = await inventory.ReleaseAsync(id, ct);
@@ -262,7 +251,6 @@ public sealed class RefundAdapter : Ord.IPaymentClient
         catch (Pay.ServiceException error)
         {
             throw new Ord.ServiceException(error.StatusCode == 404 ? 503 : error.StatusCode, error.Message);
-
         }
 
     }
@@ -287,7 +275,6 @@ public sealed class PaymentOrderAdapter(ECommerce.Order.Infrastructure.OrderServ
         if (NotificationUnavailable)
         {
             throw new Pay.ServiceException(503, "Callback down.");
-
         }
 
         try
@@ -299,7 +286,6 @@ public sealed class PaymentOrderAdapter(ECommerce.Order.Infrastructure.OrderServ
                 LoseNextNotificationResponse = false;
 
                 throw new Pay.ServiceException(503, "Callback response lost.");
-
             }
 
         }
@@ -307,13 +293,11 @@ public sealed class PaymentOrderAdapter(ECommerce.Order.Infrastructure.OrderServ
         catch (Ord.ServiceException error)
         {
             throw new Pay.ServiceException(error.StatusCode, error.Message);
-
         }
 
         catch (ECommerce.Order.Domain.DomainConflictException error)
         {
             throw new Pay.ServiceException(409, error.Message);
-
         }
 
     }
@@ -336,7 +320,6 @@ public sealed class CartOrderAdapter(ECommerce.Order.Infrastructure.OrderService
         if (RejectCreate)
         {
             throw new Car.ServiceException(400, "Order rejected.");
-
         }
 
         var order = await orders.CreateAsync(
@@ -359,7 +342,6 @@ public sealed class CartOrderAdapter(ECommerce.Order.Infrastructure.OrderService
             LoseNextCreateResponse = false;
 
             throw new Car.ServiceException(503, "Checkout response lost.");
-
         }
 
         return new(order.Id, order.CustomerId, order.Status.ToString(), order.Currency, order.Total);
@@ -396,7 +378,6 @@ public sealed class ProviderSpy : Pay.IPaymentProvider
         if (Unavailable)
         {
             throw new Pay.ServiceException(503, "Provider down.");
-
         }
 
         if (!_charges.TryGetValue(id, out var result))
@@ -416,7 +397,6 @@ public sealed class ProviderSpy : Pay.IPaymentProvider
         if (Unavailable)
         {
             throw new Pay.ServiceException(503, "Refund down.");
-
         }
 
         _refunds.Add(id);

@@ -38,7 +38,6 @@ public static class Program
         if (await runLock.ExecuteScalarAsync()is not true)
         {
             throw new InvalidOperationException("Another seed run is active.");
-
         }
 
         // Preflight every existing target before migrating or inserting any application data.
@@ -263,7 +262,6 @@ public static class Program
         {
             throw new InvalidOperationException(
                 $"Refusing an existing nonempty database without a seed manifest: {connection.Database}");
-
         }
 
         await using var dataset = new NpgsqlCommand(
@@ -273,7 +271,6 @@ public static class Program
         if ((long)(await dataset.ExecuteScalarAsync())! != 1)
         {
             throw new InvalidOperationException("The seed database belongs to another dataset version.");
-
         }
 
     }
@@ -307,7 +304,6 @@ public static class Program
             if (hasher.VerifyHashedPassword(user, hash, password) == PasswordVerificationResult.Failed)
             {
                 throw new InvalidOperationException("Demo password verification failed.");
-
             }
 
         }
@@ -434,7 +430,6 @@ public static class Program
             if (counts.GetValueOrDefault(table, -1) != count)
             {
                 throw new InvalidOperationException($"Unexpected row count: {connection.Database}.{table}");
-
             }
 
         }
@@ -454,7 +449,6 @@ public static class Program
                 if (products.Any(product => product.Price.Currency != "USD" || product.Price.Amount <= 0))
                 {
                     throw new InvalidOperationException("Catalog entity materialization failed.");
-
                 }
 
                 break;
@@ -467,7 +461,6 @@ public static class Program
                 if (users.Count != 1 || string.IsNullOrWhiteSpace(users[0].PasswordHash))
                 {
                     throw new InvalidOperationException("Seed admin materialization failed.");
-
                 }
 
                 break;
@@ -494,7 +487,6 @@ public static class Program
                         item => item.LineTotal))
                     {
                         throw new InvalidOperationException("Order replay fingerprint or domain total mismatch.");
-
                     }
 
                 }
@@ -516,7 +508,6 @@ public static class Program
                     if (hash != checkout.AddressHash || checkout.Items.Count != 3)
                     {
                         throw new InvalidOperationException("Checkout snapshot/hash materialization failed.");
-
                     }
 
                 }
@@ -531,7 +522,6 @@ public static class Program
                     reservation => reservation.Items.Count != 3 || reservation.Status == ECommerce.Inventory.Domain.ReservationStatus.Reserved))
                 {
                     throw new InvalidOperationException("Reservation entity materialization failed.");
-
                 }
 
                 break;
@@ -543,7 +533,6 @@ public static class Program
                 if (payments.Any(payment => !payment.OrderNotified || payment.Amount <= 0))
                 {
                     throw new InvalidOperationException("Payment entity materialization failed.");
-
                 }
 
                 break;

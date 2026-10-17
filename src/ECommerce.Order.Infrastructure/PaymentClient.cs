@@ -15,7 +15,6 @@ public sealed class PaymentClient(HttpClient http) : IPaymentClient
             if (!response.IsSuccessStatusCode)
             {
                 throw new ServiceException(503, "Payment refund remains pending recovery.");
-
             }
 
             return await response.Content.ReadFromJsonAsync<RefundSnapshot>(
@@ -27,19 +26,16 @@ public sealed class PaymentClient(HttpClient http) : IPaymentClient
         catch (HttpRequestException)
         {
             throw new ServiceException(503, "Payment is unavailable.");
-
         }
 
         catch (TaskCanceledException)when (!ct.IsCancellationRequested)
         {
             throw new ServiceException(503, "Payment refund request timed out.");
-
         }
 
         catch (JsonException)
         {
             throw new ServiceException(503, "Payment returned invalid refund data.");
-
         }
 
     }

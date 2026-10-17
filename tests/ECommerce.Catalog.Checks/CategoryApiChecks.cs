@@ -245,7 +245,6 @@ internal static class CategoryApiChecks
         if (!condition)
         {
             throw new InvalidOperationException(message);
-
         }
 
     }
@@ -367,7 +366,6 @@ internal sealed class FakeCategorySession(
             database.NextCommitFailure = null;
 
             throw failure;
-
         }
 
         if (database.RejectNextCommit)
@@ -375,7 +373,6 @@ internal sealed class FakeCategorySession(
             database.RejectNextCommit = false;
 
             throw new DuplicateCategoryException();
-
         }
 
         if (_pendingProduct is not null)

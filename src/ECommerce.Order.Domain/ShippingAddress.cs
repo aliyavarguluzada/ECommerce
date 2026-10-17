@@ -46,7 +46,6 @@ public sealed record ShippingAddress
         if (CountryCode.Length != 2 || CountryCode.Any(c => c is < 'A' or > 'Z'))
         {
             throw new DomainException("Country code must contain two letters.");
-
         }
 
     }
@@ -56,7 +55,6 @@ public sealed record ShippingAddress
         if (string.IsNullOrWhiteSpace(value) || value.Trim().Length > limit)
         {
             throw new DomainException($"Address field is required and cannot exceed {limit} characters.");
-
         }
 
         return value.Trim();
@@ -67,7 +65,6 @@ public sealed record ShippingAddress
         if (value?.Trim().Length > limit)
         {
             throw new DomainException($"Address field cannot exceed {limit} characters.");
-
         }
 
         return string.IsNullOrWhiteSpace(value) ? null : value.Trim();

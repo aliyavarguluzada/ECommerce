@@ -23,7 +23,6 @@ public sealed class StockItem
         if (productId == Guid.Empty || onHand < 0)
         {
             throw new DomainException("Product ID and non-negative initial stock are required.");
-
         }
 
         return new()
@@ -46,7 +45,6 @@ public sealed class StockItem
         if (delta == 0 || amount < Reserved || amount > int.MaxValue)
         {
             throw new DomainException("Adjustment must be non-zero and cannot reduce stock below reserved units or overflow.");
-
         }
 
         OnHand = (int)amount;
@@ -62,7 +60,6 @@ public sealed class StockItem
         if (quantity > Available)
         {
             throw new DomainException("Insufficient available stock.");
-
         }
 
         Reserved += quantity;
@@ -78,7 +75,6 @@ public sealed class StockItem
         if (quantity > Reserved)
         {
             throw new DomainException("Reservation exceeds reserved stock.");
-
         }
 
         Reserved -= quantity;
@@ -96,7 +92,6 @@ public sealed class StockItem
         if (quantity > Reserved)
         {
             throw new DomainException("Reservation exceeds reserved stock.");
-
         }
 
         Reserved -= quantity;
@@ -118,7 +113,6 @@ public sealed class StockItem
         if (quantity <= 0)
         {
             throw new DomainException("Quantity must be positive.");
-
         }
 
     }

@@ -21,7 +21,6 @@ public sealed class ShoppingCart
         if (customerId == Guid.Empty)
         {
             throw new DomainException("Customer ID is required.");
-
         }
 
         return new()
@@ -40,7 +39,6 @@ public sealed class ShoppingCart
         if (productId == Guid.Empty || quantity is < 1 or > 100000)
         {
             throw new DomainException("Product and quantity 1–100000 are required.");
-
         }
 
         var line = _items.SingleOrDefault(x => x.ProductId == productId);
@@ -50,7 +48,6 @@ public sealed class ShoppingCart
             if (_items.Count >= 100)
             {
                 throw new DomainException("A cart supports at most 100 distinct products.");
-
             }
 
             _items.Add(new(productId, quantity));
@@ -94,7 +91,6 @@ public sealed class ShoppingCart
         if (id == Guid.Empty || _items.Count == 0)
         {
             throw new DomainException("Checkout requires a request ID and a non-empty cart.");
-
         }
 
         PendingCheckoutId = id;
@@ -108,7 +104,6 @@ public sealed class ShoppingCart
         if (PendingCheckoutId != id)
         {
             throw new DomainException("Checkout does not match the pending cart.");
-
         }
 
         _items.Clear();
@@ -136,7 +131,6 @@ public sealed class ShoppingCart
         if (PendingCheckoutId.HasValue)
         {
             throw new DomainConflictException("Checkout is pending. Retry its original request before editing the cart.");
-
         }
 
     }
@@ -158,7 +152,6 @@ public sealed class CartLine
         if (productId == Guid.Empty)
         {
             throw new DomainException("Product ID is required.");
-
         }
 
         ProductId = productId;
@@ -172,7 +165,6 @@ public sealed class CartLine
         if (quantity is < 1 or > 100000)
         {
             throw new DomainException("Quantity must be 1–100000.");
-
         }
 
         Quantity = quantity;
@@ -221,7 +213,6 @@ public sealed class CheckoutAttempt
             x => x.ProductId).Distinct().Count() != snapshot.Length)
         {
             throw new DomainException("Invalid checkout snapshot.");
-
         }
 
         var attempt = new CheckoutAttempt

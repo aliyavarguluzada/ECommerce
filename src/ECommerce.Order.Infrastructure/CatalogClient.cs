@@ -16,13 +16,11 @@ public sealed class CatalogClient(HttpClient http) : ICatalogClient
             if (response.StatusCode == HttpStatusCode.NotFound)
             {
                 throw new ServiceException(400, $"Catalog product {id} does not exist.");
-
             }
 
             if (!response.IsSuccessStatusCode)
             {
                 throw new ServiceException(503, "Catalog is unavailable.");
-
             }
 
             var product = await response.Content.ReadFromJsonAsync<CatalogProduct>(
@@ -35,7 +33,6 @@ public sealed class CatalogClient(HttpClient http) : ICatalogClient
                 product.Name))
             {
                 throw new ServiceException(503, "Catalog returned invalid product data.");
-
             }
 
             return product;
@@ -44,19 +41,16 @@ public sealed class CatalogClient(HttpClient http) : ICatalogClient
         catch (HttpRequestException)
         {
             throw new ServiceException(503, "Catalog is unavailable.");
-
         }
 
         catch (TaskCanceledException)when (!ct.IsCancellationRequested)
         {
             throw new ServiceException(503, "Catalog request timed out.");
-
         }
 
         catch (JsonException)
         {
             throw new ServiceException(503, "Catalog returned invalid product data.");
-
         }
 
     }

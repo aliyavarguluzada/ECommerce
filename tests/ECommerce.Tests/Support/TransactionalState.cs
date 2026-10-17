@@ -23,7 +23,6 @@ public class TransactionalState<T>
         if (_work is not null)
         {
             throw new InvalidOperationException("Unexpected nested transaction.");
-
         }
 
         _work = Graph.Copy(Data);

@@ -121,7 +121,6 @@ static void Check(bool condition, string name)
     if (!condition)
     {
         throw new InvalidOperationException($"Failed: {name}");
-
     }
 
 }
@@ -140,5 +139,4 @@ static void ExpectDomainError(Action action)
     }
 
     throw new InvalidOperationException("Expected a domain validation error.");
-
 }

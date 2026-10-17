@@ -26,7 +26,6 @@ internal static class ProductQueryChecks
         if (!detailSql.Contains("JOIN") || !pageSql.Contains("ILIKE") || !pageSql.Contains("LIMIT") || !pageSql.Contains("OFFSET") || !countSql.Contains("count("))
         {
             throw new InvalidOperationException("Product queries must translate to PostgreSQL SQL.");
-
         }
 
         Console.WriteLine("Product PostgreSQL query translation checks passed.");

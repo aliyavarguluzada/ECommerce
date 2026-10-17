@@ -75,7 +75,6 @@ public sealed class Product : AggregateRoot
         if (Price.Currency != price.Currency)
         {
             throw new DomainException("A product's currency cannot be changed.");
-
         }
 
         ChangePrice(price);
@@ -105,7 +104,6 @@ public sealed class Product : AggregateRoot
         if (Price.Currency != newPrice.Currency)
         {
             throw new DomainException("A product's currency cannot be changed.");
-
         }
 
         if (Price == newPrice)
@@ -151,7 +149,6 @@ public sealed class Product : AggregateRoot
         if (categoryId == Guid.Empty)
         {
             throw new DomainException("Category ID cannot be empty.");
-
         }
 
     }

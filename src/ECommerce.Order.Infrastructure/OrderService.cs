@@ -21,7 +21,6 @@ public class OrderService(
             x => x.ProductId).Distinct().Count() != request.Items.Count)
         {
             throw new DomainException("Request ID, customer, valid address, and 1–100 distinct products with quantities 1–100000 are required.");
-
         }
 
         var address = request.ShippingAddress.ToDomain();
@@ -44,7 +43,6 @@ public class OrderService(
                 if (existing.RequestFingerprint != fingerprint)
                 {
                     throw new ServiceException(409, "Request ID was already used for a different order.");
-
                 }
 
                 await tx.CommitAsync(ct);
@@ -64,7 +62,6 @@ public class OrderService(
                     if (!product.IsActive)
                     {
                         throw new ServiceException(400, $"Product {item.ProductId} is discontinued.");
-
                     }
 
                     currency ??= product.Currency;
@@ -72,7 +69,6 @@ public class OrderService(
                     if (currency != product.Currency)
                     {
                         throw new DomainException("All order items must have the same currency.");
-
                     }
 
                     lines.Add(new OrderLine(item.ProductId, product.Name, item.Quantity, product.Price));
@@ -124,7 +120,6 @@ public class OrderService(
             status.Value)))
         {
             throw new DomainException("Invalid pagination or order filters.");
-
         }
 
         return ReadListAsync(page, size, customerId, status, ct);
@@ -182,7 +177,6 @@ public class OrderService(
             else if (order.CancellationReason != request.Reason?.Trim())
             {
                 throw new ServiceException(409, "Cancellation is already in progress with a different reason.");
-
             }
 
             await tx.CommitAsync(ct);
@@ -209,7 +203,6 @@ public class OrderService(
             else if (order.Status is not (OrderStatus.Confirming or OrderStatus.Confirmed or OrderStatus.Shipped or OrderStatus.Delivered))
             {
                 throw new ServiceException(409, "Order inventory is not ready for payment confirmation.");
-
             }
 
             await SaveChangesAsync(ct);
@@ -239,7 +232,6 @@ public class OrderService(
                 if (reserve.Status != "Reserved")
                 {
                     throw new ServiceException(409, "Inventory reservation is not in the expected state.");
-
                 }
 
                 order.MarkReserved();
@@ -253,7 +245,6 @@ public class OrderService(
                 if (commit.Status != "Committed")
                 {
                     throw new ServiceException(409, "Inventory commit is not in the expected state.");
-
                 }
 
                 order.Confirm();
@@ -267,7 +258,6 @@ public class OrderService(
                 if (release.Status != "Released")
                 {
                     throw new ServiceException(409, "Inventory release is not in the expected state.");
-
                 }
 
                 if (order.PaymentId.HasValue && !order.PaymentRefunded)
@@ -277,7 +267,6 @@ public class OrderService(
                     if (refund.Status != "Refunded" || refund.PaymentId != order.PaymentId)
                     {
                         throw new ServiceException(503, "Payment refund remains pending.");
-
                     }
 
                     order.RecordRefund();
@@ -313,7 +302,6 @@ public class OrderService(
             if (order.Carrier != request.Carrier?.Trim() || order.TrackingNumber != request.TrackingNumber?.Trim())
             {
                 throw new ServiceException(409, "Order was already shipped with different tracking details.");
-
             }
 
         }
@@ -390,7 +378,6 @@ public class OrderService(
         if (id == Guid.Empty)
         {
             throw new DomainException("Order ID cannot be empty.");
-
         }
 
         db.ChangeTracker.Clear();
@@ -413,7 +400,6 @@ public class OrderService(
             await tx.DisposeAsync();
 
             throw;
-
         }
 
     }

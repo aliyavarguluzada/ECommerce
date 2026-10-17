@@ -23,7 +23,6 @@ public sealed class OrderLine
             2) != unitPrice || unitPrice * quantity > 9999999999999999.99m)
         {
             throw new DomainException("Invalid order line.");
-
         }
 
         ProductId = productId;

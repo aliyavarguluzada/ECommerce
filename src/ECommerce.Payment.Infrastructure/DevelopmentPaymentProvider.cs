@@ -14,7 +14,6 @@ public sealed class DevelopmentPaymentProvider(bool enabled) : IPaymentProvider
         if (!enabled)
         {
             throw new ServiceException(503, "A production payment provider is not configured.");
-
         }
 
         return Task.FromResult(
@@ -32,7 +31,6 @@ public sealed class DevelopmentPaymentProvider(bool enabled) : IPaymentProvider
         if (!enabled)
         {
             throw new ServiceException(503, "A production payment provider is not configured.");
-
         }
 
         return Task.CompletedTask;

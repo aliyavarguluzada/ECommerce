@@ -123,7 +123,6 @@ public sealed class OrdersController(IOrderService service) : ControllerBase
         if (!User.IsInRole("Admin") && order.CustomerId != User.CustomerId())
         {
             throw new ServiceException(404, "Order not found.");
-
         }
 
         return order;

@@ -74,7 +74,6 @@ public sealed class PurchaseOrder
             x => x.ProductId).Distinct().Count() != lines.Length)
         {
             throw new DomainException("Order identity, customer, and distinct items are required.");
-
         }
 
         var code = currency.Trim().ToUpperInvariant();
@@ -82,7 +81,6 @@ public sealed class PurchaseOrder
         if (code.Length != 3 || code.Any(c => c is < 'A' or > 'Z'))
         {
             throw new DomainException("Invalid currency.");
-
         }
 
         ArgumentNullException.ThrowIfNull(address);
@@ -92,7 +90,6 @@ public sealed class PurchaseOrder
         if (total > 9999999999999999.99m)
         {
             throw new DomainException("Order total exceeds supported amount.");
-
         }
 
         var order = new PurchaseOrder
@@ -137,7 +134,6 @@ public sealed class PurchaseOrder
         if (!PaymentId.HasValue || PaymentRefunded)
         {
             throw new DomainConflictException("Successful payment is required before confirmation.");
-
         }
 
         Set(OrderStatus.Confirming);
@@ -149,19 +145,16 @@ public sealed class PurchaseOrder
         if (paymentId == Guid.Empty || amount != Total || currency != Currency)
         {
             throw new DomainConflictException("Payment does not match the order total and currency.");
-
         }
 
         if (Status is OrderStatus.Cancelled or OrderStatus.Cancelling || PaymentRefunded)
         {
             throw new DomainConflictException("Cancelled or refunded orders cannot accept payment.");
-
         }
 
         if (PaymentId.HasValue && PaymentId != paymentId)
         {
             throw new DomainConflictException("Order already has another payment.");
-
         }
 
         PaymentId = paymentId;
@@ -191,13 +184,11 @@ public sealed class PurchaseOrder
         if (Status is not (OrderStatus.PendingInventory or OrderStatus.Reserved or OrderStatus.Confirmed))
         {
             throw new DomainConflictException("Only pending, reserved, or confirmed orders may be cancelled.");
-
         }
 
         if (string.IsNullOrWhiteSpace(reason) || reason.Trim().Length > 500)
         {
             throw new DomainException("Cancellation reason must contain 1–500 characters.");
-
         }
 
         CancellationReason = reason.Trim();
@@ -221,13 +212,11 @@ public sealed class PurchaseOrder
         if (!PaymentId.HasValue || PaymentRefunded)
         {
             throw new DomainConflictException("A paid order is required for shipping.");
-
         }
 
         if (string.IsNullOrWhiteSpace(carrier) || carrier.Trim().Length > 100 || string.IsNullOrWhiteSpace(trackingNumber) || trackingNumber.Trim().Length > 150)
         {
             throw new DomainException("Carrier and tracking number are required.");
-
         }
 
         Carrier = carrier.Trim();

@@ -60,7 +60,6 @@ public sealed class PaymentRecord
             c => c is < 'A' or > 'Z') || method is not ("dev-approved" or "dev-declined"))
         {
             throw new DomainException("Use an order, request ID, and development method token dev-approved or dev-declined.");
-
         }
 
         return new()
@@ -91,7 +90,6 @@ public sealed class PaymentRecord
         if (Status != PaymentStatus.Pending)
         {
             throw new DomainException("Payment is not pending.");
-
         }
 
         ProviderReference = reference;
@@ -117,7 +115,6 @@ public sealed class PaymentRecord
         if (Status != PaymentStatus.Succeeded)
         {
             throw new DomainException("Only successful payments can be refunded.");
-
         }
 
         Status = PaymentStatus.Refunding;
@@ -131,7 +128,6 @@ public sealed class PaymentRecord
         if (Status != PaymentStatus.Refunding)
         {
             throw new DomainException("Refund is not pending.");
-
         }
 
         Status = PaymentStatus.Refunded;

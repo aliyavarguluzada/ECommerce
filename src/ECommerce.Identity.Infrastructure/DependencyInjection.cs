@@ -57,7 +57,6 @@ public static class DependencyInjection
                 if (!result.Succeeded)
                 {
                     throw new InvalidOperationException("Could not initialize identity roles.");
-
                 }
 
             }
@@ -71,7 +70,6 @@ public static class DependencyInjection
         if (string.IsNullOrWhiteSpace(email) || string.IsNullOrWhiteSpace(password))
         {
             throw new InvalidOperationException("Set BootstrapAdmin:Email and BootstrapAdmin:Password before bootstrapping.");
-
         }
 
         await SeedRolesAsync(provider);
@@ -85,7 +83,6 @@ public static class DependencyInjection
         if (user is not null)
         {
             throw new InvalidOperationException("Bootstrap only creates a new account. Use the authenticated admin role API for existing users.");
-
         }
 
         user = new ApplicationUser
@@ -105,7 +102,6 @@ public static class DependencyInjection
         if (!created.Succeeded)
         {
             throw new InvalidOperationException(string.Join(" ", created.Errors.Select(x => x.Description)));
-
         }
 
         foreach (var role in new[]
@@ -121,7 +117,6 @@ public static class DependencyInjection
             if (!(await users.AddToRoleAsync(user, role)).Succeeded)
             {
                 throw new InvalidOperationException("Could not assign bootstrap administrator roles.");
-
             }
 
         }

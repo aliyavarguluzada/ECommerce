@@ -9,7 +9,6 @@ internal static class DomainRules
         if (string.IsNullOrWhiteSpace(value))
         {
             throw new DomainException("Name is required.");
-
         }
 
         var name = value.Trim();
@@ -17,7 +16,6 @@ internal static class DomainRules
         if (name.Length > maxLength)
         {
             throw new DomainException($"Name cannot exceed {maxLength} characters.");
-
         }
 
         return name;
@@ -30,7 +28,6 @@ internal static class DomainRules
         if (description?.Length > maxLength)
         {
             throw new DomainException($"Description cannot exceed {maxLength} characters.");
-
         }
 
         return description;

@@ -189,7 +189,6 @@ internal static class PostgreSqlIntegrationChecks
         if (!condition)
         {
             throw new InvalidOperationException(name);
-
         }
 
     }

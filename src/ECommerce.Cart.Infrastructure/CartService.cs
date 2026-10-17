@@ -60,7 +60,6 @@ public class CartService(CartDbContext db, ICatalogClient catalog, IOrderClient 
         if (product is null || !product.IsActive)
         {
             throw new ServiceException(400, "Product does not exist or is discontinued.");
-
         }
 
         await using var tx = await BeginTransactionAsync(customer, ct);
@@ -108,7 +107,6 @@ public class CartService(CartDbContext db, ICatalogClient catalog, IOrderClient 
         if (request.RequestId == Guid.Empty || request.ShippingAddress is null)
         {
             throw new ServiceException(400, "Checkout request ID and address are required.");
-
         }
 
         var address = request.ShippingAddress.Normalize();
@@ -126,13 +124,11 @@ public class CartService(CartDbContext db, ICatalogClient catalog, IOrderClient 
                 if (existing.CustomerId != customer || existing.AddressHash != hash)
                 {
                     throw new ServiceException(409, "Checkout request ID was used for different content.");
-
                 }
 
                 if (existing.Status == CheckoutStatus.Failed)
                 {
                     throw new ServiceException(409, "Checkout failed. Edit the cart and use a new request ID.");
-
                 }
 
                 await tx.CommitAsync(ct);
@@ -168,7 +164,6 @@ public class CartService(CartDbContext db, ICatalogClient catalog, IOrderClient 
         if (current.Status == CheckoutStatus.Failed)
         {
             throw new ServiceException(409, "Checkout failed. Use a new request ID.");
-
         }
 
         if (current.Status == CheckoutStatus.Completed)
@@ -178,7 +173,6 @@ public class CartService(CartDbContext db, ICatalogClient catalog, IOrderClient 
             if (prior.CustomerId != customer)
             {
                 throw new ServiceException(403, "Order ownership mismatch.");
-
             }
 
             await execution.CommitAsync(ct);
@@ -207,13 +201,11 @@ public class CartService(CartDbContext db, ICatalogClient catalog, IOrderClient 
             await execution.CommitAsync(ct);
 
             throw;
-
         }
 
         if (order.CustomerId != customer || order.Id != request.RequestId)
         {
             throw new ServiceException(503, "Order returned an invalid checkout result.");
-
         }
 
         var cartToClear = await FindAsync(
@@ -263,7 +255,6 @@ public class CartService(CartDbContext db, ICatalogClient catalog, IOrderClient 
         if (attempt.CustomerId != customer)
         {
             throw new ServiceException(404, "Checkout not found.");
-
         }
 
         var address = JsonSerializer.Deserialize<AddressRequest>(
@@ -296,7 +287,6 @@ public class CartService(CartDbContext db, ICatalogClient catalog, IOrderClient 
             await tx.DisposeAsync();
 
             throw;
-
         }
 
     }

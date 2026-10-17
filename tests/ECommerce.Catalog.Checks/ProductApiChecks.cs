@@ -386,7 +386,6 @@ internal static class ProductApiChecks
         if (!condition)
         {
             throw new InvalidOperationException(message);
-
         }
 
     }

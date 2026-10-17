@@ -78,11 +78,9 @@ public sealed class InventoryClient(HttpClient http) : IInventoryClient
                     }
 
                     throw new ServiceException(409, message);
-
                 }
 
                 throw new ServiceException(503, "Inventory is unavailable.");
-
             }
 
             var reservation = await response.Content.ReadFromJsonAsync<ReservationSnapshot>(
@@ -93,7 +91,6 @@ public sealed class InventoryClient(HttpClient http) : IInventoryClient
             if (reservation.OrderId != id || reservation.Status is not ("Reserved" or "Committed" or "Released"))
             {
                 throw new ServiceException(503, "Inventory returned an invalid reservation.");
-
             }
 
             return reservation;
@@ -102,19 +99,16 @@ public sealed class InventoryClient(HttpClient http) : IInventoryClient
         catch (HttpRequestException)
         {
             throw new ServiceException(503, "Inventory is unavailable.");
-
         }
 
         catch (TaskCanceledException)when (!ct.IsCancellationRequested)
         {
             throw new ServiceException(503, "Inventory request timed out.");
-
         }
 
         catch (JsonException)
         {
             throw new ServiceException(503, "Inventory returned invalid reservation data.");
-
         }
 
     }

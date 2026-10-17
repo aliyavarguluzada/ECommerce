@@ -21,7 +21,6 @@ public sealed class StockAdjustment
         if (requestId == Guid.Empty || productId == Guid.Empty || delta == 0 || string.IsNullOrWhiteSpace(reason) || reason.Trim().Length > 500)
         {
             throw new DomainException("Request ID, product ID, a non-zero adjustment, and a reason of at most 500 characters are required.");
-
         }
 
         return new()

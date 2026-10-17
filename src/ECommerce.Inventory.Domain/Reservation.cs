@@ -36,7 +36,6 @@ public sealed class Reservation
             x => x.ProductId).Distinct().Count() != lines.Length)
         {
             throw new DomainException("A reservation needs an order ID and 1–100 distinct products.");
-
         }
 
         var result = new Reservation
@@ -63,7 +62,6 @@ public sealed class Reservation
         if (orderId == Guid.Empty)
         {
             throw new DomainException("Order ID is required.");
-
         }
 
         return new()
@@ -89,7 +87,6 @@ public sealed class Reservation
         if (Status == ReservationStatus.Released)
         {
             throw new DomainException("Released reservations cannot be committed.");
-
         }
 
         Status = ReservationStatus.Committed;
@@ -123,7 +120,6 @@ public sealed record ReservationLine
         if (productId == Guid.Empty || quantity is < 1 or > 100000)
         {
             throw new DomainException("Reservation quantity must be 1–100000.");
-
         }
 
         ProductId = productId;

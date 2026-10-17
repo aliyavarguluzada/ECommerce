@@ -19,13 +19,11 @@ public sealed record Money
         if (amount < 0 || amount > 9999999999999999.99m)
         {
             throw new DomainException("Amount must be non-negative and fit decimal(18, 2).");
-
         }
 
         if (decimal.Round(amount, 2) != amount)
         {
             throw new DomainException("Amount must have at most two decimal places.");
-
         }
 
         var normalizedCurrency = currency?.Trim().ToUpperInvariant();
@@ -34,7 +32,6 @@ public sealed record Money
             c => c is < 'A' or > 'Z'))
         {
             throw new DomainException("Currency must contain three letters.");
-
         }
 
         Amount = amount;

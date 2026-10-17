@@ -25,7 +25,6 @@ public sealed class CatalogDbContext(DbContextOptions<CatalogDbContext> options)
             // The unique index handles simultaneous requests that pass the pre-check.
 
             throw new DuplicateCategoryException();
-
         }
 
         catch (DbUpdateException exception)when (exception.InnerException is PostgresException { SqlState: PostgresErrorCodes.ForeignKeyViolation, ConstraintName: "FK_products_categories_CategoryId" } && exception.Entries.Any(
@@ -34,26 +33,22 @@ public sealed class CatalogDbContext(DbContextOptions<CatalogDbContext> options)
             // A product may be added after the application checks for existing products.
 
             throw new CategoryInUseException();
-
         }
 
         catch (DbUpdateConcurrencyException exception)when (exception.Entries.Any(x => x.Entity is Category))
         {
             throw new CategoryConcurrencyException();
-
         }
 
         catch (DbUpdateException exception)when (exception.InnerException is PostgresException { SqlState: PostgresErrorCodes.ForeignKeyViolation, ConstraintName: "FK_products_categories_CategoryId" } && exception.Entries.Any(
             x => x.Entity is Product && x.State is EntityState.Added or EntityState.Modified))
         {
             throw new InvalidProductCategoryException();
-
         }
 
         catch (DbUpdateConcurrencyException exception)when (exception.Entries.Any(x => x.Entity is Product))
         {
             throw new ProductConcurrencyException();
-
         }
 
     }

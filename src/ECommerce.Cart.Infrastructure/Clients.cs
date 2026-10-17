@@ -22,7 +22,6 @@ public sealed class CatalogClient(HttpClient http) : ICatalogClient
             if (!response.IsSuccessStatusCode)
             {
                 throw new ServiceException(503, "Catalog is unavailable.");
-
             }
 
             var product = await response.Content.ReadFromJsonAsync<CatalogProduct>(
@@ -36,7 +35,6 @@ public sealed class CatalogClient(HttpClient http) : ICatalogClient
                 product.Currency) || product.Currency.Length != 3)
             {
                 throw new ServiceException(503, "Catalog returned invalid product data.");
-
             }
 
             return product;
@@ -45,19 +43,16 @@ public sealed class CatalogClient(HttpClient http) : ICatalogClient
         catch (HttpRequestException)
         {
             throw new ServiceException(503, "Catalog is unavailable.");
-
         }
 
         catch (TaskCanceledException)when (!ct.IsCancellationRequested)
         {
             throw new ServiceException(503, "Catalog timed out.");
-
         }
 
         catch (JsonException)
         {
             throw new ServiceException(503, "Catalog returned invalid data.");
-
         }
 
     }
@@ -108,7 +103,6 @@ public sealed class OrderClient(HttpClient http) : IOrderClient
                 throw new ServiceException(
                     (int)response.StatusCode is 400 or 409 ? (int)response.StatusCode : 503,
                     "Order could not complete checkout. Inspect the cart and retry the original checkout request.");
-
             }
 
             return await response.Content.ReadFromJsonAsync<OrderSnapshot>(
@@ -120,19 +114,16 @@ public sealed class OrderClient(HttpClient http) : IOrderClient
         catch (HttpRequestException)
         {
             throw new ServiceException(503, "Order is unavailable. Retry checkout with the same request ID.");
-
         }
 
         catch (TaskCanceledException)when (!ct.IsCancellationRequested)
         {
             throw new ServiceException(503, "Order timed out. Retry checkout with the same request ID.");
-
         }
 
         catch (JsonException)
         {
             throw new ServiceException(503, "Order returned invalid data.");
-
         }
 
     }

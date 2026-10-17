@@ -16,7 +16,6 @@ public class InventoryService(InventoryDbContext db, ICatalogClient catalog) : I
         if (!product.IsActive)
         {
             throw new ServiceException(400, "Discontinued products cannot be added to inventory.");
-
         }
 
         await using var tx = await BeginTransactionAsync(request.ProductId, ct);
@@ -24,7 +23,6 @@ public class InventoryService(InventoryDbContext db, ICatalogClient catalog) : I
         if (await FindStockAsync(request.ProductId, ct)is not null)
         {
             throw new ServiceException(409, "Stock already exists for this product.");
-
         }
 
         Add(stock);
@@ -48,7 +46,6 @@ public class InventoryService(InventoryDbContext db, ICatalogClient catalog) : I
         if (maxAvailable < 0)
         {
             throw new DomainException("Low-stock threshold cannot be negative.");
-
         }
 
         return ReadStocksAsync(page, size, maxAvailable, ct);
@@ -76,7 +73,6 @@ public class InventoryService(InventoryDbContext db, ICatalogClient catalog) : I
         if (existing is not null && !existing.Matches(adjustment))
         {
             throw new ServiceException(409, "Request ID was already used for another adjustment.");
-
         }
 
         var stock = (await LockStocksAsync(
@@ -116,7 +112,6 @@ public class InventoryService(InventoryDbContext db, ICatalogClient catalog) : I
         if (status.HasValue && !Enum.IsDefined(status.Value))
         {
             throw new DomainException("Invalid reservation status.");
-
         }
 
         return ReadReservationsAsync(page, size, status, ct);
@@ -127,7 +122,6 @@ public class InventoryService(InventoryDbContext db, ICatalogClient catalog) : I
         if (request.Items is null || request.Items.Any(x => x is null))
         {
             throw new DomainException("Reservation items are required.");
-
         }
 
         var reservation = Reservation.Create(
@@ -145,7 +139,6 @@ public class InventoryService(InventoryDbContext db, ICatalogClient catalog) : I
                 throw new ServiceException(
                     409,
                     "Order reservation is released or its items differ from the original request.");
-
             }
 
             await tx.CommitAsync(ct);
@@ -163,13 +156,11 @@ public class InventoryService(InventoryDbContext db, ICatalogClient catalog) : I
             if (!stocks.TryGetValue(line.ProductId, out var stock))
             {
                 throw new ServiceException(409, $"Product {line.ProductId} has no inventory.");
-
             }
 
             if (stock.Available < line.Quantity)
             {
                 throw new ServiceException(409, $"Insufficient stock for product {line.ProductId}.");
-
             }
 
             stock.Reserve(line.Quantity);
@@ -198,7 +189,6 @@ public class InventoryService(InventoryDbContext db, ICatalogClient catalog) : I
         if (reservation.Status == ReservationStatus.Released)
         {
             throw new ServiceException(409, "Released reservation cannot be committed.");
-
         }
 
         if (reservation.Status == ReservationStatus.Reserved)
@@ -280,7 +270,6 @@ public class InventoryService(InventoryDbContext db, ICatalogClient catalog) : I
         if (id == Guid.Empty)
         {
             throw new DomainException("Operation ID cannot be empty.");
-
         }
 
         db.ChangeTracker.Clear();
@@ -303,7 +292,6 @@ public class InventoryService(InventoryDbContext db, ICatalogClient catalog) : I
             await tx.DisposeAsync();
 
             throw;
-
         }
 
     }
