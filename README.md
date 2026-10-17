@@ -1,5 +1,13 @@
 # ECommerce
 
+Open the [storefront and admin workspace](http://localhost:5100/shop/) or
+[authenticated Swagger](http://localhost:5100/swagger) after starting Compose.
+See [Development workflow](docs/development-workflow.md) for checkout verification,
+performance measurements, frontend behavior, and PostgreSQL CI.
+
+For a separate dataset with 100,000 users and 100,000 orders, see
+[Large demonstration dataset](docs/seed-data.md).
+
 ## Architecture
 
 Diagram exported from [GitDiagram](https://gitdiagram.com/aliyavarguluzada/ecommerce).
@@ -311,7 +319,7 @@ coverage matrix and instructions for optional live PostgreSQL tests.
 dotnet test tests/ECommerce.Tests/ECommerce.Tests.csproj '-p:Platform=AnyCPU'
 ```
 
-Latest verification (2026-10-17): **152 passed, 0 skipped, 0 failed**, including all six
-live database tests against an isolated PostgreSQL 16 container. Live tests require
+Latest verification (2026-10-18): **161 passed, 0 skipped, 0 failed**, including all six
+live database tests in an isolated temporary database on PostgreSQL 18. Live tests require
 `ECOMMERCE_TEST_POSTGRES_CONNECTION`; otherwise those six tests are skipped.
 Tests use temporary signing keys and service credentials. No real payments occur.

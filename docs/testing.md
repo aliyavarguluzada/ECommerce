@@ -64,10 +64,16 @@ Identity registration, duplicate accounts, refresh rotation/reuse revocation, lo
 password changes, role-change revocation, self-demotion rejection, and lockout.
 Other services and the payment provider remain test doubles in each database test.
 
-Latest verification (2026-10-17): **152 passed, 0 skipped, 0 failed**, with all six
-live tests running against a fresh PostgreSQL 16 container. No test schemas remained
-after the run, and the temporary container was removed. Without a configured
+Latest verification (2026-10-18): **161 passed, 0 skipped, 0 failed**, with all six
+live tests running in a fresh temporary database on PostgreSQL 18. The temporary
+test database was removed afterward. Without a configured
 connection, the default suite still skips the six live tests.
+
+Nine additional tests cover bearer/service-key OpenAPI metadata, public endpoint
+documentation, the gateway documentation proxy, and storefront delivery/security headers.
+Six Node tests cover browser rendering helpers and input encoding. See
+[Development workflow](development-workflow.md) for the full checkout verifier,
+performance baseline, and GitHub Actions setup.
 
 ## Existing Catalog checks
 

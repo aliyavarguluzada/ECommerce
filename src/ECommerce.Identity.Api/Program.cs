@@ -32,7 +32,7 @@ public class Program
             options => options.JsonSerializerOptions.Converters.Add(
                 new JsonStringEnumConverter(allowIntegerValues: false)));
 
-        builder.Services.AddOpenApi();
+        builder.Services.AddCommerceOpenApi();
 
         builder.Services.AddProblemDetails();
 

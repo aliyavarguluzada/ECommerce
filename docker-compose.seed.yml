@@ -1,0 +1,21 @@
+# Optional override. Applying this switches the API containers to the separate seed databases.
+# Usage: docker compose -f docker-compose.yml -f docker-compose.seed.yml up -d --build
+services:
+  catalog:
+    environment:
+      ConnectionStrings__CatalogDatabase: "Host=postgres;Database=ecommerce_seed_catalog;Username=ecommerce;Password=ecommerce"
+  identity:
+    environment:
+      ConnectionStrings__IdentityDatabase: "Host=postgres;Database=ecommerce_seed_identity;Username=ecommerce;Password=ecommerce"
+  order:
+    environment:
+      ConnectionStrings__OrderDatabase: "Host=postgres;Database=ecommerce_seed_order;Username=ecommerce;Password=ecommerce"
+  payment:
+    environment:
+      ConnectionStrings__PaymentDatabase: "Host=postgres;Database=ecommerce_seed_payment;Username=ecommerce;Password=ecommerce"
+  inventory:
+    environment:
+      ConnectionStrings__InventoryDatabase: "Host=postgres;Database=ecommerce_seed_inventory;Username=ecommerce;Password=ecommerce"
+  cart:
+    environment:
+      ConnectionStrings__CartDatabase: "Host=postgres;Database=ecommerce_seed_cart;Username=ecommerce;Password=ecommerce"

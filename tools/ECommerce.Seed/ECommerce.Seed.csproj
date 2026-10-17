@@ -1,0 +1,19 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <TargetFramework>net10.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+  </PropertyGroup>
+  <ItemGroup>
+    <ProjectReference Include="../../src/ECommerce.Catalog.Infrastructure/ECommerce.Catalog.Infrastructure.csproj" />
+    <ProjectReference Include="../../src/ECommerce.Identity.Infrastructure/ECommerce.Identity.Infrastructure.csproj" />
+    <ProjectReference Include="../../src/ECommerce.Inventory.Infrastructure/ECommerce.Inventory.Infrastructure.csproj" />
+    <ProjectReference Include="../../src/ECommerce.Order.Infrastructure/ECommerce.Order.Infrastructure.csproj" />
+    <ProjectReference Include="../../src/ECommerce.Cart.Infrastructure/ECommerce.Cart.Infrastructure.csproj" />
+    <ProjectReference Include="../../src/ECommerce.Payment.Infrastructure/ECommerce.Payment.Infrastructure.csproj" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Update="Sql/*.sql" CopyToOutputDirectory="PreserveNewest" />
+  </ItemGroup>
+</Project>

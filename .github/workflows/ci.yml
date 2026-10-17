@@ -1,0 +1,57 @@
+name: Build and test
+
+on:
+  push:
+    branches: [master, main]
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    services:
+      postgres:
+        image: postgres:18
+        env:
+          POSTGRES_DB: ecommerce_ci
+          POSTGRES_USER: ecommerce_ci
+          POSTGRES_PASSWORD: ci-only-password
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U ecommerce_ci -d ecommerce_ci"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 12
+    env:
+      DOTNET_CLI_TELEMETRY_OPTOUT: 1
+      ECOMMERCE_TEST_POSTGRES_CONNECTION: Host=localhost;Port=5432;Database=ecommerce_ci;Username=ecommerce_ci;Password=ci-only-password
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: 10.0.x
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Restore solution
+        run: dotnet restore ECommerce.slnx '-p:Platform=Any CPU'
+      - name: Build solution
+        run: dotnet build ECommerce.slnx '-p:Platform=Any CPU' --no-restore --configuration Release
+      - name: Run all tests, including PostgreSQL
+        run: dotnet test tests/ECommerce.Tests/ECommerce.Tests.csproj '-p:Platform=AnyCPU' --configuration Release --no-build --no-restore --logger 'trx;LogFileName=tests.trx' --results-directory artifacts/tests
+      - name: Verify browser modules
+        run: |
+          node --check src/ECommerce.ApiGateway/wwwroot/shop/app.js
+          node --test tests/frontend/*.test.mjs
+      - name: Save test results
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: test-results
+          path: artifacts/tests
+          if-no-files-found: ignore

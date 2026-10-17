@@ -16,7 +16,9 @@ public class Program
 
         builder.Services.AddProblemDetails();
 
-        builder.Services.AddOpenApi();
+        builder.Services.AddCommerceOpenApi();
+
+        builder.Services.AddHttpClient("documentation", client => client.Timeout = TimeSpan.FromSeconds(10));
 
         builder.Services.AddReverseProxy().LoadFromConfig(builder.Configuration.GetSection("ReverseProxy"));
 
@@ -55,14 +57,32 @@ public class Program
         {
             app.MapOpenApi();
 
-            app.UseSwaggerUI(options => options.SwaggerEndpoint("/openapi/v1.json", "Gateway API"));
+            app.UseSwaggerUI(options =>
+            {
+                foreach (var service in DocumentationEndpoints.Services)
+                {
+                    options.SwaggerEndpoint($"/docs/{service}/openapi.json", service + " API");
 
-            app.MapGet("/", () => Results.Redirect("/swagger")).ExcludeFromDescription();
+                }
+
+            });
+
+            app.MapServiceDocumentation();
 
         }
 
         app.Use(async (context, next) =>
         {
+            if (context.Request.Path.StartsWithSegments("/shop"))
+            {
+                context.Response.Headers.ContentSecurityPolicy = "default-src 'self'; script-src 'self'; style-src 'self'; img-src 'self' data:; connect-src 'self'; object-src 'none'; base-uri 'none'; frame-ancestors 'none'";
+
+                context.Response.Headers.XContentTypeOptions = "nosniff";
+
+                context.Response.Headers.CacheControl = "no-cache";
+
+            }
+
             context.Request.Headers.Remove("X-Service-Key");
 
             context.Request.Headers.Remove("X-User-Id");
@@ -89,6 +109,12 @@ public class Program
         app.UseAuthorization();
 
         app.UseRateLimiter();
+
+        app.UseStaticFiles();
+
+        app.MapGet("/", () => Results.Redirect("/shop/")).ExcludeFromDescription();
+
+        app.MapGet("/shop/", () => Results.Redirect("/shop/index.html")).ExcludeFromDescription();
 
         app.MapGet("/health/live", () => Results.Ok(new { status = "Healthy" })).AllowAnonymous();
 

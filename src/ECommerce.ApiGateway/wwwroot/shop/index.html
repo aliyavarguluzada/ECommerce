@@ -1,0 +1,32 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="Forma — everyday goods, considered. Browse the collection and manage your orders.">
+  <title>Forma — Everyday, considered.</title>
+  <link rel="stylesheet" href="styles.css">
+  <script type="module" src="app.js"></script>
+</head>
+<body>
+  <a class="skip-link" href="#main">Skip to content</a>
+  <div class="announcement">A considered collection. A little more everyday.</div>
+  <header class="header">
+    <a class="wordmark" href="#shop" aria-label="Forma home">forma<span>®</span></a>
+    <nav aria-label="Main navigation">
+      <a href="#shop" data-nav="shop">The collection</a>
+      <a href="#orders" data-nav="orders">My orders</a>
+      <a href="#admin" data-nav="admin" id="admin-link" hidden>Workspace</a>
+    </nav>
+    <div class="header-actions">
+      <button id="account-button" class="text-button">Sign in</button>
+      <button id="cart-button" class="cart-button" aria-label="Open shopping bag">Bag <span id="cart-count">0</span></button>
+    </div>
+  </header>
+  <main id="main" tabindex="-1"></main>
+  <footer><a class="wordmark small" href="#shop">forma<span>®</span></a><p>Good things. Everyday.</p><span class="development-label">Development store · simulated payments</span><a href="/swagger">API documentation ↗</a></footer>
+  <div id="notice" role="status" aria-live="polite" hidden></div>
+  <dialog id="modal" aria-labelledby="modal-title"></dialog>
+  <noscript><p>This storefront needs JavaScript to connect to the APIs.</p></noscript>
+</body>
+</html>
